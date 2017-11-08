@@ -35,7 +35,7 @@ extension KavaPlugin: AnalyticsPluginProtocol {
     
     public func registerEvents() {
         PKLog.debug("register player events")
-        
+
         self.playerEventsToRegister.forEach { event in
             PKLog.debug("Register event: \(event.self)")
             
@@ -62,7 +62,7 @@ extension KavaPlugin: AnalyticsPluginProtocol {
                     PKLog.debug("play event: \(event)")
                     strongSelf.sendAnalyticsEvent(action: KavaEventType.playRequest)
                     
-                    if (strongSelf.playReached100Percent) {
+                    if strongSelf.sentPlaybackPoints[KavaEventType.playReached100Percent] == true {
                         strongSelf.sendAnalyticsEvent(action: KavaEventType.replay)
                     }
                 })
@@ -93,9 +93,7 @@ extension KavaPlugin: AnalyticsPluginProtocol {
                 self.messageBus?.addObserver(self, events: [e.self], block: { [weak self] (event) in
                     guard let strongSelf = self, let player = self?.player else { return }
                     PKLog.debug("seeking event: \(event)")
-                    strongSelf.hasSeeked = true
-                    strongSelf.seekPercent = Float(player.currentTime) / Float(player.duration)
-                    
+                     
                     if let seekPosition = event.targetSeekPosition {
                         strongSelf.targetSeekPosition = Double(truncating: seekPosition)
                     }
@@ -117,11 +115,7 @@ extension KavaPlugin: AnalyticsPluginProtocol {
                 self.messageBus?.addObserver(self, events: [e.self], block: { [weak self] (event) in
                     guard let strongSelf = self else { return }
                     PKLog.debug("ended event: \(event)")
-                    
-                    if (!strongSelf.playReached100Percent) {
-                        strongSelf.playReached100Percent = true
-                        strongSelf.sendAnalyticsEvent(action: KavaEventType.playReached100Percent)
-                    }
+                    strongSelf.sendPercentageReachedEvent(percentage: 100)
                 })
                 
             case let e where e.self == PlayerEvent.playbackInfo:
@@ -178,6 +172,7 @@ extension KavaPlugin: AnalyticsPluginProtocol {
             }
             
             self.sendMediaLoaded()
+            self.registerToBoundaries()
         case .buffering:
             self.isBuffering = true
         case .error: break
@@ -188,11 +183,6 @@ extension KavaPlugin: AnalyticsPluginProtocol {
     private func sendMediaLoaded() {
         if !self.isMediaLoaded {
             self.isMediaLoaded = true
-            
-            if !self.intervalOn {
-                self.intervalOn = true
-                self.createTimer()
-            }
             
             sendAnalyticsEvent(action: KavaEventType.impression)
         }

@@ -15,6 +15,8 @@ import KalturaNetKit
 // MARK: - KavaPlugin
 /************************************************************/
 
+let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playReached25Percent, KavaPlugin.KavaEventType.playReached50Percent, KavaPlugin.KavaEventType.playReached75Percent, KavaPlugin.KavaEventType.playReached100Percent]
+
 @objc public class KavaPlugin: BasePlugin {
     
     // Kava event types
@@ -42,23 +44,14 @@ import KalturaNetKit
     
     var isMediaLoaded = false
     var isBuffering = false
-    
-    var seekPercent: Float = 0.0
     var targetSeekPosition: TimeInterval = 0
-    
-    var playReached25Percent = false
-    var playReached50Percent = false
-    var playReached75Percent = false
-    var playReached100Percent = false
-    var intervalOn = false
-    var hasSeeked = false
+
+    var sentPlaybackPoints: [KavaEventType : Bool] = cleanPlaybackPoints()
+    var boundaryObservationToken: UUID?
     
     let deliveryTypeHls = "hls"
     let deliveryTypeOther = "url"
     var deliveryType = "url"
-    
-    var timer: Timer?
-    var interval: TimeInterval = 10
     
     var selectedSource: PKMediaSource?
     /// The selected track indicated bitrate.
@@ -96,7 +89,6 @@ import KalturaNetKit
     public override func onUpdateMedia(mediaConfig: MediaConfig) {
         super.onUpdateMedia(mediaConfig: mediaConfig)
         self.resetPlayerFlags()
-        self.timer?.invalidate()
     }
     
     public override func onUpdateConfig(pluginConfig: Any) {
@@ -113,56 +105,64 @@ import KalturaNetKit
     
     public override func destroy() {
         self.messageBus?.removeObserver(self, events: playerEventsToRegister)
-        
-        if let t = self.timer {
-            t.invalidate()
+        if let _ = boundaryObservationToken {
+            self.player?.removeBoundaryObserver(boundaryObservationToken!)
         }
-        
         super.destroy()
+    }
+    
+    static func cleanPlaybackPoints() -> [KavaEventType : Bool] {
+        return playbackPoints.reduce([KavaEventType : Bool]()) { (dict, point) -> [KavaEventType : Bool] in
+            var dict = dict
+            dict[point] = false
+            return dict
+        }
+    }
+    
+    func registerToBoundaries() {
+        if let player = player {
+            let boundaryFactory = PKBoundaryFactory(duration: player.duration)
+            let boundaries = playbackPoints.map({ boundaryFactory.percentageTimeBoundary(boundary: convertToPercentage(type: $0)) })
+            boundaryObservationToken = player.addBoundaryObserver(boundaries: boundaries, observeOn: nil) { [weak self] (time, percentage) in
+                self?.sendPercentageReachedEvent(percentage: Int(percentage * 100))
+            }
+        }
     }
     
     func resetPlayerFlags() {
         self.isMediaLoaded = false
         self.isBuffering = false
-        self.playReached25Percent = false
-        self.playReached50Percent = false
-        self.playReached75Percent = false
-        self.playReached100Percent = false
-        self.intervalOn = false
-        self.hasSeeked = false
+        self.sentPlaybackPoints = KavaPlugin.cleanPlaybackPoints()
         self.isFirstPlay = true
         self.errorCode = -1
     }
-    
-    func createTimer() {
-        if let t = self.timer {
-            t.invalidate()
+
+    func sendPercentageReachedEvent(percentage: Int) {
+        var eventsToSend: [KavaEventType] = []
+        for item in sentPlaybackPoints {
+            if item.value == false && convertToPercentage(type: item.key) <= percentage {
+                eventsToSend.append(item.key)
+                sentPlaybackPoints[item.key] = true
+            }
         }
         
-        self.timer = Timer.every(self.interval) {
-            guard let player = self.player else { return }
-            let progress = Float(player.currentTime) / Float(player.duration)
-            PKLog.debug("Progress is \(progress)")
-            
-            if progress >= 0.25 && !self.playReached25Percent && self.seekPercent <= 0.25 {
-                self.playReached25Percent = true
-                self.sendAnalyticsEvent(action: .playReached25Percent)
-            } else if progress >= 0.5 && !self.playReached50Percent && self.seekPercent < 0.5 {
-                self.playReached50Percent = true
-                self.sendAnalyticsEvent(action: .playReached50Percent)
-            } else if progress >= 0.75 && !self.playReached75Percent && self.seekPercent <= 0.75 {
-                self.playReached75Percent = true
-                self.sendAnalyticsEvent(action: .playReached75Percent)
-            } else if progress >= 0.98 && !self.playReached100Percent && self.seekPercent < 1 {
-                self.playReached100Percent = true
-                self.sendAnalyticsEvent(action: .playReached100Percent)
-            }
+        for item in eventsToSend.sorted(by: { (item1, item2) -> Bool in return item1.rawValue < item2.rawValue }) {
+            sendAnalyticsEvent(action: item)
         }
     }
     
-    func pauseTimer() {
-        if let t = self.timer {
-            t.invalidate()
+    func convertToPercentage(type: KavaEventType) -> Int {
+        switch type {
+        case .playReached25Percent:
+            return 25
+        case .playReached50Percent:
+            return 50
+        case .playReached75Percent:
+            return 75
+        case .playReached100Percent:
+            return 100
+        default:
+            return 0
         }
     }
     
@@ -171,8 +171,8 @@ import KalturaNetKit
         PKLog.debug("Action: \(action)")
         
         // send event to messageBus
-        let event = KavaEvent.Report(message: "send event with action type: \(action.rawValue)")
-        self.messageBus?.post(event)
+        //let event = KavaEvent.Report(message: "send event with action type: \(action.rawValue)")
+        //self.messageBus?.post(event)
         
 //        guard let builder: KalturaRequestBuilder = KavaService.get(config: self.config, eventType: <#T##Int#>, entryId: <#T##String#>, sessionId: <#T##String#>, eventIndex: <#T##Int#>, referrer: <#T##String#>, deliveryType: <#T##String#>, playbackType: <#T##String#>, position: <#T##TimeInterval#>, sessionStartTime: <#T##Float#>, bufferTime: <#T##Float#>, bufferTimeSum: <#T##Float#>, actualBitrate: <#T##Float#>, targetPosition: <#T##Float#>, caption: <#T##String#>, errorCode: <#T##Int#>)
         
@@ -189,6 +189,7 @@ import KalturaNetKit
 //        }
 //        
 //        USRExecutor.shared.send(request: builder.build())
+
     }
 }
 

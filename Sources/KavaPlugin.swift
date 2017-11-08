@@ -183,12 +183,12 @@ import KalturaNetKit
 //                                                                       sessionId: player.sessionId,
 //                                                                       position: Int32(player.currentTime),
 //                                                                       widgetId: "_\(self.config.partnerId)", isSeek: hasSeeked) else { return }
-        let builder: KalturaRequestBuilder! = nil
-        builder.set { (response: Response) in
-            PKLog.debug("Response: \(response)")
-        }
-        
-        USRExecutor.shared.send(request: builder.build())
+//        let builder: KalturaRequestBuilder! = nil
+//        builder.set { (response: Response) in
+//            PKLog.debug("Response: \(response)")
+//        }
+//        
+//        USRExecutor.shared.send(request: builder.build())
     }
 }
 

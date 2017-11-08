@@ -22,21 +22,31 @@ import PlayKit
     
     private let defaultBaseUrl = "http://analytics.kaltura.com/api_v3/index.php"
     
+    /// application ID.
     let applicationId = Bundle.main.bundleIdentifier
-    
+    /// The player id and configuration the content was played on.
     @objc public var uiconfId: Int
+    /// The partner account ID on Kaltura's platform.
     @objc public var partnerId: Int
-    @objc public var ks: String
-    @objc public var playbackContext: String
-    @objc public var referrerAsBase64: String? {
-        get { return self.referrerAsBase64 }
+    /// The Kaltura encoded session data.
+    @objc public var ks: String?
+    /// The category id describing the current played context.
+    @objc public var playbackContext: String?
+    /// Received from plugin config if nothing there take app id wit relavant prefix.
+    @objc public var referrer: String? {
+        get { return self.referrer }
         set {
-            if let referrer = newValue {
-                if self.isValidReferrer(referrer) {
-                    self.referrerAsBase64 = referrer.toBase64()
+            if let referrerToBase64 = newValue {
+                if self.isValidReferrer(referrerToBase64) {
+                    self.referrer = referrerToBase64.toBase64()
                 } else {
                     PKLog.warning("Invalid referrer argument. Should start with app:// or http:// or https://")
-                    self.referrerAsBase64 = nil
+                    if let appId = applicationId {
+                        self.referrer = "app://" + appId
+                    } else {
+                        PKLog.warning("App id is not set")
+                    }
+                    
                 }
             }
         }
@@ -49,8 +59,8 @@ import PlayKit
     // MARK: - Initialization
     /************************************************************/
     
-    @objc public init(uiconfId: Int, partnerId: Int, ks: String, playbackContext: String,
-                      referrerAsBase64: String, baseUrl: String, customVar1: String, customVar2: String, customVar3: String) {
+    @objc public init(uiconfId: Int, partnerId: Int, ks: String?, playbackContext: String?,
+                      referrer: String?, customVar1: String?, customVar2: String?, customVar3: String?) {
         self.baseUrl = defaultBaseUrl
         self.uiconfId = uiconfId
         self.partnerId = partnerId
@@ -60,7 +70,7 @@ import PlayKit
         self.customVar2 = customVar2
         self.customVar3 = customVar3
         super.init()
-        self.referrerAsBase64 = referrerAsBase64
+        self.referrer = referrer
     }
     
     /************************************************************/

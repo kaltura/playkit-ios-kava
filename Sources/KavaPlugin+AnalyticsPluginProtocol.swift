@@ -180,7 +180,6 @@ extension KavaPlugin: AnalyticsPluginProtocol {
             self.sendMediaLoaded()
         case .buffering:
             self.isBuffering = true
-            self.sendAnalyticsEvent(action: .error)
         case .error: break
         case .unknown: break
         }

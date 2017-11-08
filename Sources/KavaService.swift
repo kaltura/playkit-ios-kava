@@ -24,7 +24,7 @@ internal class KavaService {
             partnerId: config.partnerId,
             ks: config.ks,
             playbackContext: config.playbackContext,
-            referrer: config.referrerAsBase64,
+            referrer: config.referrer,
             eventType: eventType,
             entryId: entryId,
             sessionId: sessionId,
@@ -44,7 +44,7 @@ internal class KavaService {
         )
     }
     
-    static func get(baseURL: String, appId: String, uiconfId: Int, partnerId: Int, ks: String, playbackContext: String, referrer: String?, eventType: Int, entryId: String, sessionId: String,   eventIndex: Int, deliveryType: String, playbackType: String, clientVer: String, clientTag: String, position: TimeInterval, sessionStartTime: Float, bufferTime: Float, bufferTimeSum: Float, actualBitrate: Float, targetPosition: Float, caption: String, errorCode: Int) -> KalturaRequestBuilder? {
+    static func get(baseURL: String, appId: String, uiconfId: Int, partnerId: Int, ks: String?, playbackContext: String?, referrer: String?, eventType: Int, entryId: String, sessionId: String,   eventIndex: Int, deliveryType: String, playbackType: String, clientVer: String, clientTag: String, position: TimeInterval, sessionStartTime: Float, bufferTime: Float, bufferTimeSum: Float, actualBitrate: Float, targetPosition: Float, caption: String, errorCode: Int) -> KalturaRequestBuilder? {
         
         if let request: KalturaRequestBuilder = KalturaRequestBuilder(url: baseURL, service: nil, action: nil) {
             request

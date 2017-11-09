@@ -43,11 +43,15 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
     }
     
     var isMediaLoaded = false
-    var isBuffering = false
     var targetSeekPosition: TimeInterval = 0
 
     var sentPlaybackPoints: [KavaEventType : Bool] = cleanPlaybackPoints()
     var boundaryObservationToken: UUID?
+    var viewTimer: Timer?
+    
+    var totalBuffering: TimeInterval = TimeInterval()
+    var totalBufferingInCurrentInterval: TimeInterval = TimeInterval()
+    var bufferingStartTime: Date?
     
     let deliveryTypeHls = "hls"
     let deliveryTypeOther = "url"
@@ -89,6 +93,8 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
     public override func onUpdateMedia(mediaConfig: MediaConfig) {
         super.onUpdateMedia(mediaConfig: mediaConfig)
         self.resetPlayerFlags()
+        self.unregisterFromBoundaries()
+        self.stopViewTimer()
     }
     
     public override func onUpdateConfig(pluginConfig: Any) {
@@ -105,9 +111,8 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
     
     public override func destroy() {
         self.messageBus?.removeObserver(self, events: playerEventsToRegister)
-        if let _ = boundaryObservationToken {
-            self.player?.removeBoundaryObserver(boundaryObservationToken!)
-        }
+        self.unregisterFromBoundaries()
+        self.stopViewTimer()
         super.destroy()
     }
     
@@ -120,7 +125,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
     }
     
     func registerToBoundaries() {
-        if let player = player {
+        if let player = player, boundaryObservationToken == nil {
             let boundaryFactory = PKBoundaryFactory(duration: player.duration)
             let boundaries = playbackPoints.map({ boundaryFactory.percentageTimeBoundary(boundary: convertToPercentage(type: $0)) })
             boundaryObservationToken = player.addBoundaryObserver(boundaries: boundaries, observeOn: nil) { [weak self] (time, percentage) in
@@ -129,14 +134,45 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
         }
     }
     
+    func unregisterFromBoundaries() {
+        if let _ = boundaryObservationToken {
+            player?.removeBoundaryObserver(boundaryObservationToken!)
+            boundaryObservationToken = nil
+        }
+    }
+    
+    func setupViewTimer() {
+        if viewTimer == nil {
+            viewTimer = Timer.scheduledTimer(timeInterval: 10, target: self, selector: #selector(reportView), userInfo: nil, repeats: true)
+        }
+    }
+    
+    func stopViewTimer() {
+        viewTimer?.invalidate()
+        viewTimer = nil
+    }
+    
+    @objc func reportView() {
+        if let _ = bufferingStartTime {
+            totalBufferingInCurrentInterval += -bufferingStartTime!.timeIntervalSinceNow
+            bufferingStartTime = Date()
+        }
+        sendAnalyticsEvent(action: .view, data: totalBufferingInCurrentInterval)
+        
+        totalBuffering += totalBufferingInCurrentInterval
+        totalBufferingInCurrentInterval = TimeInterval()
+    }
+    
     func resetPlayerFlags() {
         self.isMediaLoaded = false
-        self.isBuffering = false
         self.sentPlaybackPoints = KavaPlugin.cleanPlaybackPoints()
         self.isFirstPlay = true
         self.errorCode = -1
+        self.bufferingStartTime = nil
+        self.totalBuffering = TimeInterval()
+        self.totalBufferingInCurrentInterval = TimeInterval()
     }
-
+    
     func sendPercentageReachedEvent(percentage: Int) {
         var eventsToSend: [KavaEventType] = []
         for item in sentPlaybackPoints {
@@ -166,9 +202,9 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
         }
     }
     
-    func sendAnalyticsEvent(action: KavaEventType) {
-        guard let player = self.player else { return }
-        PKLog.debug("Action: \(action)")
+    func sendAnalyticsEvent(action: KavaEventType, data: Any? = nil) {
+        //guard let player = self.player else { return }
+        PKLog.debug("Action: \(action), data: \(data ?? "")")
         
         // send event to messageBus
         //let event = KavaEvent.Report(message: "send event with action type: \(action.rawValue)")

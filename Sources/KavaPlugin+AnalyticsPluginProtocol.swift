@@ -72,7 +72,9 @@ extension KavaPlugin: AnalyticsPluginProtocol {
                     guard let strongSelf = self else { return }
                     PKLog.debug("pause event: \(event)")
                     strongSelf.isPaused = true
+
                     strongSelf.sendAnalyticsEvent(action: KavaEventType.pause)
+                    strongSelf.reportView()
                     strongSelf.stopViewTimer()
                 })
                 
@@ -116,7 +118,9 @@ extension KavaPlugin: AnalyticsPluginProtocol {
                 self.messageBus?.addObserver(self, events: [e.self], block: { [weak self] (event) in
                     guard let strongSelf = self else { return }
                     PKLog.debug("ended event: \(event)")
+                    
                     strongSelf.sendPercentageReachedEvent(percentage: 100)
+                    strongSelf.reportView()
                     strongSelf.stopViewTimer()
                 })
                 

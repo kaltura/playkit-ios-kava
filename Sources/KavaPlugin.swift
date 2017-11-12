@@ -12,64 +12,61 @@ import PlayKit
 import KalturaNetKit
 
 /************************************************************/
+// MARK: - Playback Points Array
+/************************************************************/
+
+/// playbackPoints Array represents points in %, that show how much was reached from playback
+let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playReached25Percent, KavaPlugin.KavaEventType.playReached50Percent, KavaPlugin.KavaEventType.playReached75Percent, KavaPlugin.KavaEventType.playReached100Percent]
+
+/************************************************************/
 // MARK: - KavaPlugin
 /************************************************************/
 
-let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playReached25Percent, KavaPlugin.KavaEventType.playReached50Percent, KavaPlugin.KavaEventType.playReached75Percent, KavaPlugin.KavaEventType.playReached100Percent]
-
+/// This class represents Kaltura real time analytics for live and on-demand video.
 @objc public class KavaPlugin: BasePlugin {
     
-    // Kava event types
+    /// Kava event types
     enum KavaEventType : Int {
         /// Media was loaded
         case impression = 1
-        /// Play was triggred
+        /// Play event was triggred
         case playRequest = 2
-        /// Playing was triggred
+        /// Playing event was triggred
         case play = 3
-        /// Resume was triggred
+        /// Resume event was triggred
         case resume = 4
+        /// player reached 25 percent
         case playReached25Percent = 11
+        /// player reached 50 percent
         case playReached50Percent = 12
+        /// player reached 75 percent
         case playReached75Percent = 13
+        /// player reached 100 percent
         case playReached100Percent = 14
+        /// Pause event was triggred
         case pause = 33
+        /// Replay event was triggred
         case replay = 34
+        /// Seeking event was triggred
         case seek = 35
+        /// Captions event (text track was changed) was triggred
         case captions = 38
+        /// Source Selected (media was changed) event was triggred
         case sourceSelected = 39
+        /// Error event was triggred
         case error = 98
+        /// Sent every 10 seconds of active playback.
         case view = 99
     }
     
-    var isMediaLoaded = false
-    var targetSeekPosition: TimeInterval = 0
-
+    var config: KavaPluginConfig!
     var sentPlaybackPoints: [KavaEventType : Bool] = cleanPlaybackPoints()
     var boundaryObservationToken: UUID?
     var viewTimer: Timer?
-    
-    var totalBuffering: TimeInterval = TimeInterval()
-    var totalBufferingInCurrentInterval: TimeInterval = TimeInterval()
     var bufferingStartTime: Date?
-    
-    let deliveryTypeHls = "hls"
-    let deliveryTypeOther = "url"
-    var deliveryType = "url"
-    
-    var selectedSource: PKMediaSource?
-    /// The selected track indicated bitrate.
-    var indicatedBitrate: Double?
-    
-    var errorCode: Int = -1
-    
-    var currentCaptionLanguage: String?
-    
-    var config: KavaPluginConfig!
-    /// indicates whether we played for the first time or not.
-    public var isFirstPlay: Bool = true
-    /// indicates whether playback is paused.
-    public var isPaused: Bool = true
+    var kavaData = KavaPluginData()
+    /// A sequence number which describe the order of events in a viewing session.
+    private var eventIndex = 1
     
     /************************************************************/
     // MARK: PKPlugin
@@ -154,23 +151,25 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
     
     @objc func reportView() {
         if let _ = bufferingStartTime {
-            totalBufferingInCurrentInterval += -bufferingStartTime!.timeIntervalSinceNow
+            self.kavaData.totalBufferingInCurrentInterval += -bufferingStartTime!.timeIntervalSinceNow
             bufferingStartTime = Date()
         }
-        sendAnalyticsEvent(action: .view, data: totalBufferingInCurrentInterval)
         
-        totalBuffering += totalBufferingInCurrentInterval
-        totalBufferingInCurrentInterval = TimeInterval()
+        self.sendAnalyticsEvent(action: .view, data: self.kavaData.totalBufferingInCurrentInterval)
+        
+        self.kavaData.totalBuffering += self.kavaData.totalBufferingInCurrentInterval
+        self.kavaData.totalBufferingInCurrentInterval = TimeInterval()
     }
     
     func resetPlayerFlags() {
-        self.isMediaLoaded = false
+        self.kavaData.isMediaLoaded = false
         self.sentPlaybackPoints = KavaPlugin.cleanPlaybackPoints()
-        self.isFirstPlay = true
-        self.errorCode = -1
+        self.kavaData.isFirstPlay = true
+        self.kavaData.errorCode = -1
         self.bufferingStartTime = nil
-        self.totalBuffering = TimeInterval()
-        self.totalBufferingInCurrentInterval = TimeInterval()
+        self.kavaData.totalBuffering = TimeInterval()
+        self.kavaData.totalBufferingInCurrentInterval = TimeInterval()
+        self.eventIndex = 1
     }
     
     func sendPercentageReachedEvent(percentage: Int) {
@@ -203,29 +202,40 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
     }
     
     func sendAnalyticsEvent(action: KavaEventType, data: Any? = nil) {
-        //guard let player = self.player else { return }
+        guard let player = self.player, let mediaEntry = player.mediaEntry else {
+            PKLog.warning("Player/ MediaEntry is nil")
+            return
+            
+        }
+        
         PKLog.debug("Action: \(action), data: \(data ?? "")")
         
         // send event to messageBus
-        //let event = KavaEvent.Report(message: "send event with action type: \(action.rawValue)")
-        //self.messageBus?.post(event)
+        let event = KavaEvent.Report(message: "send event with action type: \(action.rawValue)")
+        self.messageBus?.post(event)
         
-//        guard let builder: KalturaRequestBuilder = KavaService.get(config: self.config, eventType: <#T##Int#>, entryId: <#T##String#>, sessionId: <#T##String#>, eventIndex: <#T##Int#>, referrer: <#T##String#>, deliveryType: <#T##String#>, playbackType: <#T##String#>, position: <#T##TimeInterval#>, sessionStartTime: <#T##Float#>, bufferTime: <#T##Float#>, bufferTimeSum: <#T##Float#>, actualBitrate: <#T##Float#>, targetPosition: <#T##Float#>, caption: <#T##String#>, errorCode: <#T##Int#>)
-        
-//        guard let builder: KalturaRequestBuilder = KavaService.get(config: self.config,
-//                                                                       eventType: action.rawValue,
-//                                                                       entryId: PlayKitManager.clientTag,
-//                                                                       duration: Float(player.duration),
-//                                                                       sessionId: player.sessionId,
-//                                                                       position: Int32(player.currentTime),
-//                                                                       widgetId: "_\(self.config.partnerId)", isSeek: hasSeeked) else { return }
-//        let builder: KalturaRequestBuilder! = nil
-//        builder.set { (response: Response) in
-//            PKLog.debug("Response: \(response)")
-//        }
-//        
-//        USRExecutor.shared.send(request: builder.build())
+        guard let builder: KalturaRequestBuilder = KavaService.get(config: self.config, entryId: mediaEntry.id, sessionId: player.sessionId, eventType: action.rawValue, playbackType: self.getPlaybackType(), position: (self.player?.currentTime)! ,eventIndex: self.eventIndex, kavaData: self.kavaData) else { return }
 
+        builder.set { (response: Response) in
+            PKLog.debug("Response: \(response)")
+        }
+
+        USRExecutor.shared.send(request: builder.build())
+        self.eventIndex+=1
+    }
+    
+    // TODO:: cover general case
+    private func getPlaybackType() -> String {
+        if self.player?.mediaEntry?.mediaType == MediaType.vod {
+            return "vod"
+        } else if self.player?.mediaEntry?.mediaType == MediaType.live {
+            let distanceFromLiveThreshold = 1500
+            let distanceFromLive = Double((self.player?.duration)!) - Double((self.player?.currentTime)!)
+            
+            return distanceFromLive > Double(distanceFromLiveThreshold) ? "Dvr" : "live"
+        }
+        
+        return "unknown"
     }
 }
 

@@ -15,7 +15,7 @@ import KalturaNetKit
 
 internal class KavaService {
     
-    static func get(config: KavaPluginConfig, eventType: Int, entryId: String, sessionId: String,   eventIndex: Int, referrer: String, deliveryType: String, playbackType: String, position: TimeInterval, sessionStartTime: Float, bufferTime: Float, bufferTimeSum: Float, actualBitrate: Float, targetPosition: Float, caption: String, errorCode: Int) -> KalturaRequestBuilder? {
+    static func get(config: KavaPluginConfig, entryId: String, sessionId: String, eventType: KavaPlugin.KavaEventType.RawValue, playbackType: String, position: Double, eventIndex: Int, kavaData: KavaPluginData) -> KalturaRequestBuilder? {
         
         return self.get(
             baseURL: config.baseUrl,
@@ -29,22 +29,27 @@ internal class KavaService {
             entryId: entryId,
             sessionId: sessionId,
             eventIndex: eventIndex,
-            deliveryType: deliveryType,
+            deliveryType: kavaData.deliveryType,
+            // TODO:: optimizie to genral case
             playbackType: playbackType,
             clientVer: PlayKitManager.clientTag,
             clientTag: PlayKitManager.clientTag,
             position: position,
-            sessionStartTime: sessionStartTime,
-            bufferTime: bufferTime,
-            bufferTimeSum: bufferTimeSum,
-            actualBitrate: actualBitrate,
-            targetPosition: targetPosition,
-            caption: caption,
-            errorCode: errorCode
+            // TODO::
+            sessionStartTime: 0,//kavaData.sessionStartTime,
+            bufferTime: kavaData.totalBufferingInCurrentInterval,
+            bufferTimeSum: kavaData.totalBuffering,
+            actualBitrate: kavaData.indicatedBitrate!,
+            targetPosition: kavaData.targetSeekPosition,
+            caption: kavaData.currentCaptionLanguage!,
+            errorCode: kavaData.errorCode
         )
     }
     
-    static func get(baseURL: String, appId: String, uiconfId: Int, partnerId: Int, ks: String?, playbackContext: String?, referrer: String?, eventType: Int, entryId: String, sessionId: String,   eventIndex: Int, deliveryType: String, playbackType: String, clientVer: String, clientTag: String, position: TimeInterval, sessionStartTime: Float, bufferTime: Float, bufferTimeSum: Float, actualBitrate: Float, targetPosition: Float, caption: String, errorCode: Int) -> KalturaRequestBuilder? {
+    // TODO:: add optional params to requset
+    
+    // TODO:: finilize request
+    static func get(baseURL: String, appId: String, uiconfId: Int, partnerId: Int, ks: String?, playbackContext: String?, referrer: String?, eventType: Int, entryId: String, sessionId: String,   eventIndex: Int, deliveryType: String, playbackType: String, clientVer: String, clientTag: String, position: TimeInterval, sessionStartTime: Double, bufferTime: Double, bufferTimeSum: Double, actualBitrate: Double, targetPosition: Double, caption: String, errorCode: Int) -> KalturaRequestBuilder? {
         
         if let request: KalturaRequestBuilder = KalturaRequestBuilder(url: baseURL, service: nil, action: nil) {
             request

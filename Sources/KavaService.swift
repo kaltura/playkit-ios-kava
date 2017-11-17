@@ -15,7 +15,7 @@ import KalturaNetKit
 
 internal class KavaService {
     
-    static func get(config: KavaPluginConfig, entryId: String, sessionId: String, eventType: KavaPlugin.KavaEventType.RawValue, playbackType: String, position: Double, eventIndex: Int, kavaData: KavaPluginData) -> KalturaRequestBuilder? {
+    static func get(config: KavaPluginConfig, entryId: String, sessionId: String, eventType: KavaPlugin.KavaEventType.RawValue, playbackType: String, position: Double, eventIndex: Int,  sessionStartTime: String?, kavaData: KavaPluginData) -> KalturaRequestBuilder? {
         
         return self.get(
             baseURL: config.baseUrl,
@@ -24,24 +24,25 @@ internal class KavaService {
             partnerId: config.partnerId,
             ks: config.ks,
             playbackContext: config.playbackContext,
-            referrer: config.referrer,
+            // putting ! is safe since on KavaPluginConfig
+            // on init func referrer gets value.
+            referrer: config.referrer!,
             eventType: eventType,
             entryId: entryId,
             sessionId: sessionId,
             eventIndex: eventIndex,
+            sessionStartTime: sessionStartTime,
             deliveryType: kavaData.deliveryType,
             // TODO:: optimizie to genral case
             playbackType: playbackType,
             clientVer: PlayKitManager.clientTag,
             clientTag: PlayKitManager.clientTag,
             position: position,
-            // TODO::
-            sessionStartTime: 0,//kavaData.sessionStartTime,
             bufferTime: kavaData.totalBufferingInCurrentInterval,
             bufferTimeSum: kavaData.totalBuffering,
-            actualBitrate: kavaData.indicatedBitrate!,
+            actualBitrate: kavaData.indicatedBitrate,
             targetPosition: kavaData.targetSeekPosition,
-            caption: kavaData.currentCaptionLanguage!,
+            caption: kavaData.currentCaptionLanguage,
             errorCode: kavaData.errorCode
         )
     }
@@ -49,43 +50,49 @@ internal class KavaService {
     // TODO:: add optional params to requset
     
     // TODO:: finilize request
-    static func get(baseURL: String, appId: String, uiconfId: Int, partnerId: Int, ks: String?, playbackContext: String?, referrer: String?, eventType: Int, entryId: String, sessionId: String,   eventIndex: Int, deliveryType: String, playbackType: String, clientVer: String, clientTag: String, position: TimeInterval, sessionStartTime: Double, bufferTime: Double, bufferTimeSum: Double, actualBitrate: Double, targetPosition: Double, caption: String, errorCode: Int) -> KalturaRequestBuilder? {
+    static func get(baseURL: String, appId: String, uiconfId: Int, partnerId: Int, ks: String?, playbackContext: String?, referrer: String, eventType: Int, entryId: String, sessionId: String, eventIndex: Int, sessionStartTime: String?, deliveryType: String, playbackType: String, clientVer: String, clientTag: String, position: TimeInterval, bufferTime: Double, bufferTimeSum: Double, actualBitrate: Double?, targetPosition: Double, caption: String?, errorCode: Int) -> KalturaRequestBuilder? {
         
         if let request: KalturaRequestBuilder = KalturaRequestBuilder(url: baseURL, service: nil, action: nil) {
             request
-                .setParam(key: "clientTag", value: "kwidget:v\(clientVer)")
-//                .setParam(key: "service", value: "stats")
-//                .setParam(key: "apiVersion", value: "3.1")
-//                .setParam(key: "expiry", value: "86400")
-//                .setParam(key: "format", value: "1")
-//                .setParam(key: "ignoreNull", value: "1")
-//                .setParam(key: "action", value: "collect")
-//                .setParam(key: "event:eventType", value: "\(eventType)")
-//                .setParam(key: "event:clientVer", value: "\(clientVer)")
-//                .setParam(key: "event:currentPoint", value: "\(position)")
-//                .setParam(key: "event:duration", value: "\(duration)")
-//                .setParam(key: "event:eventTimeStamp", value: "\(Date().timeIntervalSince1970)")
-//                .setParam(key: "event:isFirstInSession", value: "false")
-//                .setParam(key: "event:objectType", value: "KalturaStatsEvent")
-//                .setParam(key: "event:partnerId", value: partnerId)
-//                .setParam(key: "event:sessionId", value: sessionId)
-//                .setParam(key: "event:uiconfId", value: "\(uiConfId)")
-//                .setParam(key: "event:seek", value: String(isSeek))
-//                .setParam(key: "event:entryId", value: entryId)
-//                .setParam(key: "event:widgetId", value: widgetId)
-//                .setParam(key: "event:referrer", value: referrer)
-//                .set(method: .get)
-//
-//            if contextId > 0 {
-//                request.setParam(key: "event:contextId", value: "\(contextId)")
-//            }
-//            if let applicationId = appId, applicationId != "" {
-//                request.setParam(key: "event:applicationId", value: applicationId)
-//            }
-//            if let userId = userId, userId != "" {
-//                request.setParam(key: "event:userId", value: userId)
-//            }
+            .setParam(key: "eventType", value: String(eventType))
+            .setParam(key: "partnerId", value: String(partnerId))
+            .setParam(key: "entryId", value: entryId)
+            .setParam(key: "sessionId", value: sessionId)
+            .setParam(key: "eventIndex", value: String(eventIndex))
+            .setParam(key: "referrer", value: referrer)
+            .setParam(key: "deliveryType", value: deliveryType)
+            .setParam(key: "playbackType", value: playbackType)
+            .setParam(key: "clientVer", value: "kwidget:v\(clientVer)")
+            .setParam(key: "clientTag", value: "kwidget:v\(clientVer)")
+            .setParam(key: "position", value: String(position))
             
+            if let sessionTime = sessionStartTime {
+                request.setParam(key: "sessionStartTime", value: sessionTime)
+            }
+            
+            switch eventType {
+            case KavaPlugin.KavaEventType.view.rawValue,
+                 KavaPlugin.KavaEventType.play.rawValue,
+                 KavaPlugin.KavaEventType.resume.rawValue:
+                request.setParam(key: "bufferTime", value: String(bufferTime))
+                request.setParam(key: "bufferTimeSum", value: String(bufferTimeSum))
+                request.setParam(key: "actualBitrate", value: String(describing: actualBitrate))
+            case KavaPlugin.KavaEventType.seek.rawValue:
+                request.setParam(key: "targetPosition", value: String(targetPosition))
+            case KavaPlugin.KavaEventType.captions.rawValue:
+                if let currentCaption = caption {
+                    request.setParam(key: "caption", value: currentCaption)
+                }
+            case KavaPlugin.KavaEventType.error.rawValue:
+                if (errorCode != -1) {
+                    request.setParam(key: "errorCode", value: String(errorCode))
+                }
+            default:
+                PKLog.debug("KavaEventType accured: \(eventType)")
+            }
+
+            request.set(responseSerializer: StringSerializer())
+
             return request
         } else {
             return nil

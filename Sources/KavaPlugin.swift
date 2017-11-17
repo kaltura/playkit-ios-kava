@@ -67,6 +67,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
     var kavaData = KavaPluginData()
     /// A sequence number which describe the order of events in a viewing session.
     private var eventIndex = 1
+    private var sessionStartTime: String?
     
     /************************************************************/
     // MARK: PKPlugin
@@ -155,7 +156,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
             bufferingStartTime = Date()
         }
         
-        self.sendAnalyticsEvent(action: .view, data: self.kavaData.totalBufferingInCurrentInterval)
+        self.sendAnalyticsEvent(event: .view, data: self.kavaData.totalBufferingInCurrentInterval)
         
         self.kavaData.totalBuffering += self.kavaData.totalBufferingInCurrentInterval
         self.kavaData.totalBufferingInCurrentInterval = TimeInterval()
@@ -182,7 +183,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
         }
         
         for item in eventsToSend.sorted(by: { (item1, item2) -> Bool in return item1.rawValue < item2.rawValue }) {
-            sendAnalyticsEvent(action: item)
+            sendAnalyticsEvent(event: item)
         }
     }
     
@@ -201,23 +202,27 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
         }
     }
     
-    func sendAnalyticsEvent(action: KavaEventType, data: Any? = nil) {
+    func sendAnalyticsEvent(event: KavaEventType, data: Any? = nil) {
         guard let player = self.player, let mediaEntry = player.mediaEntry else {
             PKLog.warning("Player/ MediaEntry is nil")
-            return
             
+            return    
         }
         
-        PKLog.debug("Action: \(action), data: \(data ?? "")")
+        PKLog.debug("Action: \(event), data: \(data ?? "")")
         
         // send event to messageBus
-        let event = KavaEvent.Report(message: "send event with action type: \(action.rawValue)")
-        self.messageBus?.post(event)
+        let eventType = KavaEvent.Report(message: "send event with action type: \(event.rawValue)")
+        self.messageBus?.post(eventType)
         
-        guard let builder: KalturaRequestBuilder = KavaService.get(config: self.config, entryId: mediaEntry.id, sessionId: player.sessionId, eventType: action.rawValue, playbackType: self.getPlaybackType(), position: (self.player?.currentTime)! ,eventIndex: self.eventIndex, kavaData: self.kavaData) else { return }
+        guard let builder: KalturaRequestBuilder = KavaService.get(config: self.config, entryId: mediaEntry.id, sessionId: player.sessionId, eventType: event.rawValue, playbackType: self.getPlaybackType(), position: (self.player?.currentTime)!, eventIndex: self.eventIndex, sessionStartTime: self.sessionStartTime, kavaData: self.kavaData) else { return }
 
         builder.set { (response: Response) in
-            PKLog.debug("Response: \(response)")
+            PKLog.debug("Response: \(String(describing: response))")
+            
+            if (self.sessionStartTime == nil) {
+                self.sessionStartTime = response.data as? String
+            }
         }
 
         USRExecutor.shared.send(request: builder.build())
@@ -232,7 +237,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
             let distanceFromLiveThreshold = 1500
             let distanceFromLive = Double((self.player?.duration)!) - Double((self.player?.currentTime)!)
             
-            return distanceFromLive > Double(distanceFromLiveThreshold) ? "Dvr" : "live"
+            return distanceFromLive > Double(distanceFromLiveThreshold) ? "dvr" : "live"
         }
         
         return "unknown"

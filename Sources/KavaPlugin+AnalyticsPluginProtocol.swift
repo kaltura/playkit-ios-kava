@@ -69,10 +69,10 @@ extension KavaPlugin: AnalyticsPluginProtocol {
                 self.messageBus?.addObserver(self, events: [e.self], block: { [weak self] (event) in
                     guard let strongSelf = self else { return }
                     PKLog.debug("play event: \(event)")
-                    strongSelf.sendAnalyticsEvent(action: KavaEventType.playRequest)
+                    strongSelf.sendAnalyticsEvent(event: KavaEventType.playRequest)
                     
                     if strongSelf.sentPlaybackPoints[KavaEventType.playReached100Percent] == true {
-                        strongSelf.sendAnalyticsEvent(action: KavaEventType.replay)
+                        strongSelf.sendAnalyticsEvent(event: KavaEventType.replay)
                     }
                 })
                 
@@ -82,7 +82,7 @@ extension KavaPlugin: AnalyticsPluginProtocol {
                     PKLog.debug("pause event: \(event)")
                     strongSelf.kavaData.isPaused = true
 
-                    strongSelf.sendAnalyticsEvent(action: KavaEventType.pause)
+                    strongSelf.sendAnalyticsEvent(event: KavaEventType.pause)
                     strongSelf.reportView()
                     strongSelf.stopViewTimer()
                 })
@@ -93,9 +93,9 @@ extension KavaPlugin: AnalyticsPluginProtocol {
                     PKLog.debug("playing event: \(event)")
                     if strongSelf.isFirstPlay {
                         strongSelf.isFirstPlay = false
-                        strongSelf.sendAnalyticsEvent(action: KavaEventType.play)
+                        strongSelf.sendAnalyticsEvent(event: KavaEventType.play)
                     } else if strongSelf.kavaData.isPaused {
-                        strongSelf.sendAnalyticsEvent(action: KavaEventType.resume)
+                        strongSelf.sendAnalyticsEvent(event: KavaEventType.resume)
                     }
                     
                     strongSelf.kavaData.isPaused = false
@@ -112,7 +112,7 @@ extension KavaPlugin: AnalyticsPluginProtocol {
                         strongSelf.kavaData.targetSeekPosition = Double(truncating: seekPosition)
                     }
                     
-                    strongSelf.sendAnalyticsEvent(action: KavaEventType.seek)
+                    strongSelf.sendAnalyticsEvent(event: KavaEventType.seek)
                 })
                 
             case let e where e.self == PlayerEvent.sourceSelected:
@@ -149,7 +149,7 @@ extension KavaPlugin: AnalyticsPluginProtocol {
                     if let track = event.selectedTrack {
                         if (track.title.contains("event.selectedTrack?.title")) {
                             strongSelf.kavaData.currentCaptionLanguage = event.selectedTrack?.language
-                            strongSelf.sendAnalyticsEvent(action: KavaEventType.captions)
+                            strongSelf.sendAnalyticsEvent(event: KavaEventType.captions)
                         }
                     }
                 })
@@ -159,7 +159,7 @@ extension KavaPlugin: AnalyticsPluginProtocol {
                     guard let strongSelf = self else { return }
                     PKLog.debug("PlayerEvent error event: \(event)")
                     strongSelf.kavaData.errorCode = (event.error?.code)!
-                    strongSelf.sendAnalyticsEvent(action: KavaEventType.error)
+                    strongSelf.sendAnalyticsEvent(event: KavaEventType.error)
                 })
             default: assertionFailure("all events must be handled")
             }
@@ -169,7 +169,7 @@ extension KavaPlugin: AnalyticsPluginProtocol {
             guard let strongSelf = self else { return }
             PKLog.debug("AdEvent error event: \(event)")
             strongSelf.kavaData.errorCode = (event.error?.code)!
-            strongSelf.sendAnalyticsEvent(action: KavaEventType.error)
+            strongSelf.sendAnalyticsEvent(event: KavaEventType.error)
         })
     }
     
@@ -202,7 +202,7 @@ extension KavaPlugin: AnalyticsPluginProtocol {
         if !self.kavaData.isMediaLoaded {
             self.kavaData.isMediaLoaded = true
             
-            sendAnalyticsEvent(action: KavaEventType.impression)
+            sendAnalyticsEvent(event: KavaEventType.impression)
         }
     }
     

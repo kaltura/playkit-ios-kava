@@ -33,24 +33,7 @@ import PlayKit
     /// The category id describing the current played context.
     @objc public var playbackContext: String?
     /// Received from plugin config if nothing there take app id wit relavant prefix.
-    @objc public var referrer: String? {
-        get { return self.referrer }
-        set {
-            if let referrerToBase64 = newValue {
-                if self.isValidReferrer(referrerToBase64) {
-                    self.referrer = referrerToBase64.toBase64()
-                } else {
-                    PKLog.warning("Invalid referrer argument. Should start with app:// or http:// or https://")
-                    if let appId = applicationId {
-                        self.referrer = "app://" + appId
-                    } else {
-                        PKLog.warning("App id is not set")
-                    }
-                    
-                }
-            }
-        }
-    }
+    @objc public var referrer: String?
     
     @objc public var baseUrl: String
     @objc public var customVar1, customVar2, customVar3: String?
@@ -70,7 +53,19 @@ import PlayKit
         self.customVar2 = customVar2
         self.customVar3 = customVar3
         super.init()
-        self.referrer = referrer
+        
+        if let referrerToBase64 = referrer {
+            if self.isValidReferrer(referrerToBase64) {
+                self.referrer = referrerToBase64.toBase64()
+            }
+        } else {
+            PKLog.warning("Invalid referrer argument. Should start with app:// or http:// or https://")
+            if let appId = applicationId {
+                self.referrer = "app://" + appId
+            } else {
+                PKLog.warning("App id is not set")
+            }   
+        }
     }
     
     /************************************************************/

@@ -230,8 +230,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
         self.eventIndex+=1
     }
     
-    // TODO:: cover general case
-    private func getPlaybackType() -> String {
+    private func getPlaybackType() -> String? {
         if self.player?.mediaEntry?.mediaType == MediaType.vod {
             return "vod"
         } else if self.player?.mediaEntry?.mediaType == MediaType.live {
@@ -241,7 +240,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
             return distanceFromLive > Double(distanceFromLiveThreshold) ? "dvr" : "live"
         }
         
-        return "unknown"
+        return nil
     }
 }
 

@@ -16,6 +16,17 @@ import PlayKit
 /************************************************************/
 
 @objc public class KavaPluginConfig: NSObject {
+    
+    /************************************************************/
+    // MARK: - Enum
+    /************************************************************/
+    
+    @objc public enum PlaybackType : Int {
+        case unknown
+        case live
+        case vod
+    }
+    
     /************************************************************/
     // MARK: - Properties
     /************************************************************/
@@ -34,9 +45,13 @@ import PlayKit
     @objc public var playbackContext: String?
     /// Received from plugin config if nothing there take app id wit relavant prefix.
     @objc public var referrer: String?
-    
+    /// Kaltura api base url
     @objc public var baseUrl: String
+    /// Optional vars
     @objc public var customVar1, customVar2, customVar3: String?
+    /// If not using providers user must mention playback type (live/ vod)
+    /// Set by defualt to unknown
+    @objc public var playbackType: PlaybackType = .unknown
     
     /************************************************************/
     // MARK: - Initialization

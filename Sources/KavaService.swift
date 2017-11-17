@@ -15,7 +15,7 @@ import KalturaNetKit
 
 internal class KavaService {
     
-    static func get(config: KavaPluginConfig, entryId: String, sessionId: String, eventType: KavaPlugin.KavaEventType.RawValue, playbackType: String, position: Double, eventIndex: Int,  sessionStartTime: String?, kavaData: KavaPluginData) -> KalturaRequestBuilder? {
+    static func get(config: KavaPluginConfig, entryId: String, sessionId: String, eventType: KavaPlugin.KavaEventType.RawValue, playbackType: String?, position: Double, eventIndex: Int,  sessionStartTime: String?, kavaData: KavaPluginData) -> KalturaRequestBuilder? {
         
         return self.get(
             config: config,
@@ -34,7 +34,6 @@ internal class KavaService {
             eventIndex: eventIndex,
             sessionStartTime: sessionStartTime,
             deliveryType: kavaData.deliveryType,
-            // TODO:: optimizie to genral case
             playbackType: playbackType,
             clientVer: PlayKitManager.clientTag,
             clientTag: PlayKitManager.clientTag,
@@ -48,7 +47,7 @@ internal class KavaService {
         )
     }
     
-    static func get(config: KavaPluginConfig, baseURL: String, appId: String, uiconfId: Int, partnerId: Int, ks: String?, playbackContext: String?, referrer: String, eventType: Int, entryId: String, sessionId: String, eventIndex: Int, sessionStartTime: String?, deliveryType: String, playbackType: String, clientVer: String, clientTag: String, position: TimeInterval, bufferTime: Double, bufferTimeSum: Double, actualBitrate: Double?, targetPosition: Double, caption: String?, errorCode: Int) -> KalturaRequestBuilder? {
+    static func get(config: KavaPluginConfig, baseURL: String, appId: String, uiconfId: Int, partnerId: Int, ks: String?, playbackContext: String?, referrer: String, eventType: Int, entryId: String, sessionId: String, eventIndex: Int, sessionStartTime: String?, deliveryType: String, playbackType: String?, clientVer: String, clientTag: String, position: TimeInterval, bufferTime: Double, bufferTimeSum: Double, actualBitrate: Double?, targetPosition: Double, caption: String?, errorCode: Int) -> KalturaRequestBuilder? {
         
         if let request: KalturaRequestBuilder = KalturaRequestBuilder(url: baseURL, service: nil, action: nil) {
             request
@@ -59,10 +58,22 @@ internal class KavaService {
             .setParam(key: "eventIndex", value: String(eventIndex))
             .setParam(key: "referrer", value: referrer)
             .setParam(key: "deliveryType", value: deliveryType)
-            .setParam(key: "playbackType", value: playbackType)
             .setParam(key: "clientVer", value: "kwidget:v\(clientVer)")
             .setParam(key: "clientTag", value: "kwidget:v\(clientVer)")
             .setParam(key: "position", value: String(position))
+            
+            if let mediaType = playbackType {
+                request.setParam(key: "playbackType", value: mediaType)
+            } else {
+                switch config.playbackType {
+                case KavaPluginConfig.PlaybackType.unknown:
+                    fatalError("media type on KavaPluginConfig is not set when providers are not used.")
+                case KavaPluginConfig.PlaybackType.live:
+                    request.setParam(key: "playbackType", value: "live")
+                case KavaPluginConfig.PlaybackType.vod:
+                    request.setParam(key: "playbackType", value: "vod")
+                }
+            }
             
             if let sessionTime = sessionStartTime {
                 request.setParam(key: "sessionStartTime", value: sessionTime)
@@ -92,7 +103,7 @@ internal class KavaService {
             KavaService.addOptionalParams(config: config, request: request)
 
             request.set(responseSerializer: StringSerializer())
-
+            
             return request
         } else {
             PKLog.error("KalturaRequestBuilder failed")

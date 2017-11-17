@@ -18,6 +18,7 @@ internal class KavaService {
     static func get(config: KavaPluginConfig, entryId: String, sessionId: String, eventType: KavaPlugin.KavaEventType.RawValue, playbackType: String, position: Double, eventIndex: Int,  sessionStartTime: String?, kavaData: KavaPluginData) -> KalturaRequestBuilder? {
         
         return self.get(
+            config: config,
             baseURL: config.baseUrl,
             appId: config.applicationId!,
             uiconfId: config.uiconfId,
@@ -50,7 +51,7 @@ internal class KavaService {
     // TODO:: add optional params to requset
     
     // TODO:: finilize request
-    static func get(baseURL: String, appId: String, uiconfId: Int, partnerId: Int, ks: String?, playbackContext: String?, referrer: String, eventType: Int, entryId: String, sessionId: String, eventIndex: Int, sessionStartTime: String?, deliveryType: String, playbackType: String, clientVer: String, clientTag: String, position: TimeInterval, bufferTime: Double, bufferTimeSum: Double, actualBitrate: Double?, targetPosition: Double, caption: String?, errorCode: Int) -> KalturaRequestBuilder? {
+    static func get(config: KavaPluginConfig, baseURL: String, appId: String, uiconfId: Int, partnerId: Int, ks: String?, playbackContext: String?, referrer: String, eventType: Int, entryId: String, sessionId: String, eventIndex: Int, sessionStartTime: String?, deliveryType: String, playbackType: String, clientVer: String, clientTag: String, position: TimeInterval, bufferTime: Double, bufferTimeSum: Double, actualBitrate: Double?, targetPosition: Double, caption: String?, errorCode: Int) -> KalturaRequestBuilder? {
         
         if let request: KalturaRequestBuilder = KalturaRequestBuilder(url: baseURL, service: nil, action: nil) {
             request
@@ -90,12 +91,40 @@ internal class KavaService {
             default:
                 PKLog.debug("KavaEventType accured: \(eventType)")
             }
+            
+            KavaService.addOptionalParams(config: config, request: request)
 
             request.set(responseSerializer: StringSerializer())
 
             return request
         } else {
             return nil
+        }
+    }
+    
+    static private func addOptionalParams(config: KavaPluginConfig, request: KalturaRequestBuilder) {
+        if let context = config.playbackContext {
+            request.setParam(key: "playbackContext", value: context)
+        }
+        
+        if let customVar1 = config.customVar1 {
+            request.setParam(key: "customVar1", value: customVar1)
+        }
+        
+        if let customVar2 = config.customVar2 {
+            request.setParam(key: "customVar2", value: customVar2)
+        }
+        
+        if let customVar3 = config.customVar3 {
+            request.setParam(key: "customVar3", value: customVar3)
+        }
+        
+        if let ks = config.ks {
+            request.setParam(key: "ks", value: ks)
+        }
+        
+        if config.uiconfId != -1 {
+            request.setParam(key: "uiConfId", value: String(config.uiconfId))
         }
     }
 }

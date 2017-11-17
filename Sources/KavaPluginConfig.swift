@@ -24,10 +24,10 @@ import PlayKit
     
     /// application ID.
     let applicationId = Bundle.main.bundleIdentifier
-    /// The player id and configuration the content was played on.
-    @objc public var uiconfId: Int
     /// The partner account ID on Kaltura's platform.
     @objc public var partnerId: Int
+    /// The player id and configuration the content was played on.
+    @objc public var uiconfId: Int
     /// The Kaltura encoded session data.
     @objc public var ks: String?
     /// The category id describing the current played context.
@@ -42,10 +42,12 @@ import PlayKit
     // MARK: - Initialization
     /************************************************************/
     
-    @objc public init(uiconfId: Int, partnerId: Int, ks: String?, playbackContext: String?,
+    @objc public init(partnerId: Int, ks: String?, playbackContext: String?,
                       referrer: String?, customVar1: String?, customVar2: String?, customVar3: String?) {
         self.baseUrl = defaultBaseUrl
-        self.uiconfId = uiconfId
+        // uiconfId is optional, set to -1 as default
+        // can be overridden
+        self.uiconfId = -1
         self.partnerId = partnerId
         self.ks = ks
         self.playbackContext = playbackContext

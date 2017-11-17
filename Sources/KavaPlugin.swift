@@ -59,7 +59,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
         case view = 99
     }
     
-    var config: KavaPluginConfig!
+    var config: KavaPluginConfig
     var sentPlaybackPoints: [KavaEventType : Bool] = cleanPlaybackPoints()
     var boundaryObservationToken: UUID?
     var viewTimer: Timer?
@@ -78,17 +78,18 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
     }
     
     public required init(player: Player, pluginConfig: Any?, messageBus: MessageBus) throws {
-        try super.init(player: player, pluginConfig: pluginConfig, messageBus: messageBus)
         guard let config = pluginConfig as? KavaPluginConfig else {
             PKLog.error("missing plugin config or wrong plugin class type")
             throw PKPluginError.missingPluginConfig(pluginName: KavaPlugin.pluginName)
         }
         
         self.config = config
+        try super.init(player: player, pluginConfig: self.config, messageBus: messageBus)
         self.registerEvents()
     }
     
     public override func onUpdateMedia(mediaConfig: MediaConfig) {
+        PKLog.debug("onUpdateMedia: \(String(describing: mediaConfig))")
         super.onUpdateMedia(mediaConfig: mediaConfig)
         self.resetPlayerFlags()
         self.unregisterFromBoundaries()

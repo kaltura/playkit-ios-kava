@@ -29,22 +29,22 @@ class KavaPluginData {
     // MARK: - Properties
     /************************************************************/
     var isMediaLoaded = false
+    
+    /// The position of the movie in seconds that the user requested to change to.
     var targetSeekPosition: TimeInterval = 0
-    
+    /// The sum of all the buffer time during the playback.
     var totalBuffering: TimeInterval = TimeInterval()
+    /// The amount time spent on bufferring from the last viewing event.
     var totalBufferingInCurrentInterval: TimeInterval = TimeInterval()
-    
+    /// The player's streamerType (hls/ url)
     var deliveryType: String = DeliveryType.url.rawValue
-    
     var selectedSource: PKMediaSource?
     /// The selected track indicated bitrate.
     var indicatedBitrate: Double?
-    
     /// Error Code will be -1 unless it's player/ ad error.
     var errorCode: Int = -1
-    
+    /// Language of the selected caption.
     var currentCaptionLanguage: String?
-    
     /// indicates whether we played for the first time or not.
     public var isFirstPlay: Bool = true
     /// indicates whether playback is paused.

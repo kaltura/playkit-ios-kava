@@ -133,6 +133,7 @@ extension KavaPlugin: AnalyticsPluginProtocol {
                     strongSelf.sendPercentageReachedEvent(percentage: 100)
                     strongSelf.reportView()
                     strongSelf.stopViewTimer()
+                    strongSelf.resetPlayerFlags()
                 })
                 
             case let e where e.self == PlayerEvent.playbackInfo:
@@ -184,6 +185,7 @@ extension KavaPlugin: AnalyticsPluginProtocol {
         case .ended:
             PKLog.info("media ended")
         case .ready:
+             PKLog.info("media ready")
             if let _ = bufferingStartTime {
                 self.kavaData.totalBufferingInCurrentInterval += -bufferingStartTime!.timeIntervalSinceNow
                 bufferingStartTime = nil

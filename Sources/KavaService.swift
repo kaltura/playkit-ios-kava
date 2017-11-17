@@ -48,9 +48,6 @@ internal class KavaService {
         )
     }
     
-    // TODO:: add optional params to requset
-    
-    // TODO:: finilize request
     static func get(config: KavaPluginConfig, baseURL: String, appId: String, uiconfId: Int, partnerId: Int, ks: String?, playbackContext: String?, referrer: String, eventType: Int, entryId: String, sessionId: String, eventIndex: Int, sessionStartTime: String?, deliveryType: String, playbackType: String, clientVer: String, clientTag: String, position: TimeInterval, bufferTime: Double, bufferTimeSum: Double, actualBitrate: Double?, targetPosition: Double, caption: String?, errorCode: Int) -> KalturaRequestBuilder? {
         
         if let request: KalturaRequestBuilder = KalturaRequestBuilder(url: baseURL, service: nil, action: nil) {
@@ -98,6 +95,7 @@ internal class KavaService {
 
             return request
         } else {
+            PKLog.error("KalturaRequestBuilder failed")
             return nil
         }
     }

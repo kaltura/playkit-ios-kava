@@ -216,6 +216,9 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
         let eventType = KavaEvent.Report(message: "send event with action type: \(event.rawValue)")
         self.messageBus?.post(eventType)
         
+        self.kavaData.mediaDuration = player.duration
+        self.kavaData.mediaCurrentTime = player.currentTime
+        
         guard let builder: KalturaRequestBuilder = KavaService.get(config: self.config, entryId: mediaEntry.id, sessionId: player.sessionId, eventType: event.rawValue, playbackType: self.getPlaybackType(), position: (self.player?.currentTime)!, eventIndex: self.eventIndex, sessionStartTime: self.sessionStartTime, kavaData: self.kavaData) else { return }
 
         builder.set { (response: Response) in
@@ -234,10 +237,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
         if self.player?.mediaEntry?.mediaType == MediaType.vod {
             return "vod"
         } else if self.player?.mediaEntry?.mediaType == MediaType.live {
-            let distanceFromLiveThreshold = 1500
-            let distanceFromLive = Double((self.player?.duration)!) - Double((self.player?.currentTime)!)
-            
-            return distanceFromLive > Double(distanceFromLiveThreshold) ? "dvr" : "live"
+            return KavaPluginData.isDVR(duration: self.player?.duration, currentTime: self.player?.currentTime) ? "dvr" : "live"
         }
         
         return nil

@@ -43,11 +43,13 @@ internal class KavaService {
             actualBitrate: kavaData.indicatedBitrate,
             targetPosition: kavaData.targetSeekPosition,
             caption: kavaData.currentCaptionLanguage,
-            errorCode: kavaData.errorCode
+            errorCode: kavaData.errorCode,
+            duration: kavaData.mediaDuration,
+            currentTime: kavaData.mediaCurrentTime
         )
     }
     
-    static func get(config: KavaPluginConfig, baseURL: String, appId: String, uiconfId: Int, partnerId: Int, ks: String?, playbackContext: String?, referrer: String, eventType: Int, entryId: String, sessionId: String, eventIndex: Int, sessionStartTime: String?, deliveryType: String, playbackType: String?, clientVer: String, clientTag: String, position: TimeInterval, bufferTime: Double, bufferTimeSum: Double, actualBitrate: Double?, targetPosition: Double, caption: String?, errorCode: Int) -> KalturaRequestBuilder? {
+    static func get(config: KavaPluginConfig, baseURL: String, appId: String, uiconfId: Int, partnerId: Int, ks: String?, playbackContext: String?, referrer: String, eventType: Int, entryId: String, sessionId: String, eventIndex: Int, sessionStartTime: String?, deliveryType: String, playbackType: String?, clientVer: String, clientTag: String, position: TimeInterval, bufferTime: Double, bufferTimeSum: Double, actualBitrate: Double?, targetPosition: Double, caption: String?, errorCode: Int, duration: Double?, currentTime: Double?) -> KalturaRequestBuilder? {
         
         if let request: KalturaRequestBuilder = KalturaRequestBuilder(url: baseURL, service: nil, action: nil) {
             request
@@ -69,7 +71,12 @@ internal class KavaService {
                 case KavaPluginConfig.PlaybackType.unknown:
                     fatalError("media type on KavaPluginConfig is not set when providers are not used.")
                 case KavaPluginConfig.PlaybackType.live:
-                    request.setParam(key: "playbackType", value: "live")
+                    if KavaPluginData.isDVR(duration: duration, currentTime: currentTime) {
+                        request.setParam(key: "playbackType", value: "dvr")
+                    } else {
+                        request.setParam(key: "playbackType", value: "live")
+                    }
+                    
                 case KavaPluginConfig.PlaybackType.vod:
                     request.setParam(key: "playbackType", value: "vod")
                 }

@@ -83,6 +83,7 @@ let kavaConfig = KavaPluginConfig.init(partnerId: 1424501 , ks: nil, playbackCon
         case view = 99
     }
 ```
+</p></details>
 
 ### Kava Basic Sample
 

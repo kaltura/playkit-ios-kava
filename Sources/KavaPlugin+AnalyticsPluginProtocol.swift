@@ -180,10 +180,6 @@ extension KavaPlugin: AnalyticsPluginProtocol {
     
     private func handleStateChanged(event: PKEvent) {
         switch event.newState {
-        case .idle:
-            PKLog.debug("state changed to idle")
-        case .ended:
-            PKLog.info("media ended")
         case .ready:
              PKLog.info("media ready")
             if let _ = bufferingStartTime {
@@ -195,8 +191,7 @@ extension KavaPlugin: AnalyticsPluginProtocol {
             self.registerToBoundaries()
         case .buffering:
             bufferingStartTime = Date()
-        case .error: break
-        case .unknown: break
+        default: break
         }
     }
     

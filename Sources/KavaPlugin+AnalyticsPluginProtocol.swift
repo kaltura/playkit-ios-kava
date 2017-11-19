@@ -62,6 +62,7 @@ extension KavaPlugin: AnalyticsPluginProtocol {
                 self.messageBus?.addObserver(self, events: [e.self], block: { [weak self] (event) in
                     guard let strongSelf = self else { return }
                     PKLog.debug("loadedMetadata event: \(event)")
+                    strongSelf.kavaData.playbackType = strongSelf.getPlaybackType()
                     strongSelf.sendMediaLoaded()
                 })
                 

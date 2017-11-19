@@ -49,6 +49,8 @@ class KavaPluginData {
     public var isFirstPlay: Bool = true
     /// indicates whether playback is paused.
     public var isPaused: Bool = true
+    /// indicates playback type (vod/ live)
+    public var playbackType: String?
     // These params help identify DVR
     public var mediaDuration: Double?
     public var mediaCurrentTime: Double?

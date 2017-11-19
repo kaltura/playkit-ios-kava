@@ -219,7 +219,17 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
         self.kavaData.mediaDuration = player.duration
         self.kavaData.mediaCurrentTime = player.currentTime
         
-        guard let builder: KalturaRequestBuilder = KavaService.get(config: self.config, entryId: mediaEntry.id, sessionId: player.sessionId, eventType: event.rawValue, playbackType: self.getPlaybackType(), position: (self.player?.currentTime)!, eventIndex: self.eventIndex, sessionStartTime: self.sessionStartTime, kavaData: self.kavaData) else { return }
+        guard let builder: KalturaRequestBuilder =
+            KavaService.get(config: self.config,
+                            entryId: mediaEntry.id,
+                            sessionId: player.sessionId,
+                            eventType: event.rawValue,
+                            playbackType: self.kavaData.playbackType,
+                            position: player.currentTime,
+                            eventIndex: self.eventIndex,
+                            sessionStartTime: self.sessionStartTime,
+                            kavaData: self.kavaData)
+            else { return }
 
         builder.set { (response: Response) in
             PKLog.debug("Response: \(String(describing: response))")
@@ -233,7 +243,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
         self.eventIndex+=1
     }
     
-    private func getPlaybackType() -> String? {
+    func getPlaybackType() -> String? {
         if self.player?.mediaEntry?.mediaType == MediaType.vod {
             return "vod"
         } else if self.player?.mediaEntry?.mediaType == MediaType.live {

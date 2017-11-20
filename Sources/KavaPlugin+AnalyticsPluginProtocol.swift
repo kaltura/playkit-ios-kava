@@ -36,7 +36,6 @@ extension KavaPlugin: AnalyticsPluginProtocol {
             PlayerEvent.seeking,
             PlayerEvent.sourceSelected,
             PlayerEvent.ended,
-            PlayerEvent.playbackInfo,
             PlayerEvent.textTrackChanged,
             PlayerEvent.videoTrackChanged,
             PlayerEvent.error
@@ -75,7 +74,6 @@ extension KavaPlugin: AnalyticsPluginProtocol {
                     strongSelf.handleError(error: event.error)
                 default: assertionFailure("all events must be handled")
                 }
-                
             })
             
             self.messageBus?.addObserver(self, events: [AdEvent.error], block: { [weak self] (event) in

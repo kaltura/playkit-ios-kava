@@ -95,6 +95,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
         self.stopViewTimer()
         self.config.sessionId = self.player?.sessionId
         self.config.entryId = self.player?.mediaEntry?.id
+        self.config.mediaInfo = self.player?.mediaInfo
     }
     
     public override func onUpdateConfig(pluginConfig: Any) {
@@ -232,7 +233,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
         if self.player?.mediaEntry?.mediaType == MediaType.vod {
             return "vod"
         } else if self.player?.mediaEntry?.mediaType == MediaType.live {
-            return KavaPluginData.isDVR(duration: self.player?.duration, currentTime: self.player?.currentTime) ? "dvr" : "live"
+            return PKMediaInfo.isDVR(duration: self.player?.duration, currentTime: self.player?.currentTime) ? "dvr" : "live"
         }
         
         return nil

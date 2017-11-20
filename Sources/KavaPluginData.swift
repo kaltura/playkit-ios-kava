@@ -55,21 +55,3 @@ class KavaPluginData {
     public var mediaDuration: Double?
     public var mediaCurrentTime: Double?
 }
-
-/************************************************************/
-// MARK: - Extensions
-/************************************************************/
-
-extension KavaPluginData {
-    static func isDVR(duration: Double?, currentTime: Double?) -> Bool {
-        let distanceFromLiveThreshold = 1500
-        guard let mediaDuration = duration, let mediaCurrentTime = currentTime else {
-            PKLog.warning("duration/ current time are not set")
-            return false
-        }
-        
-        let distanceFromLive = Double(mediaDuration) - Double(mediaCurrentTime)
-        
-        return distanceFromLive > Double(distanceFromLiveThreshold)
-    }
-}

@@ -60,6 +60,7 @@ import PlayKit
     var entryId: String?
     var sessionId: String?
     var sessionStartTime: String?
+    var mediaInfo: PKMediaInfo?
     
     /************************************************************/
     // MARK: - Initialization

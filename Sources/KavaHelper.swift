@@ -21,37 +21,22 @@ class KavaHelper {
         
         if let request: KalturaRequestBuilder = KalturaRequestBuilder(url: config.baseUrl, service: nil, action: nil) {
             
-            KavaHelper.addMediaParams(config: config, request: request)
+            addMediaParams(config: config,
+                                      request: request)
             
             request
                 .setParam(key: "eventType", value: String(eventType))
                 .setParam(key: "eventIndex", value: String(eventIndex))
                 .setParam(key: "deliveryType", value: kavaData.deliveryType)
             
-            // TODO::
-            /*
-             if let mediaType = playbackType {
-             request.setParam(key: "playbackType", value: mediaType)
-             } else {
-             switch config.playbackType {
-             case KavaPluginConfig.PlaybackType.unknown:
-             fatalError("media type on KavaPluginConfig is not set when providers are not used.")
-             case KavaPluginConfig.PlaybackType.live:
-             if KavaPluginData.isDVR(duration: duration, currentTime: currentTime) {
-             request.setParam(key: "playbackType", value: "dvr")
-             } else {
-             request.setParam(key: "playbackType", value: "live")
-             }
-             
-             case KavaPluginConfig.PlaybackType.vod:
-             request.setParam(key: "playbackType", value: "vod")
-             }
-             }
-             */
-            
-            KavaHelper.addDynamicParams(eventType: eventType, kavaData: kavaData, request: request)
-            
-            KavaHelper.addOptionalParams(config: config, request: request)
+            KavaHelper.addMediaTypeParam(config: config,
+                                         kavaData: kavaData,
+                                         request: request)
+            addDynamicParams(eventType: eventType,
+                                        kavaData: kavaData,
+                                        request: request)
+           addOptionalParams(config: config,
+                                         request: request)
             
             // Response in this case is not in Json format
             // It's set to StringSerializer otherwise respone is errored.
@@ -120,6 +105,40 @@ class KavaHelper {
             }
         default:
             PKLog.debug("KavaEventType accured: \(eventType)")
+        }
+    }
+    
+    static private func addMediaTypeParam(config: KavaPluginConfig,
+                                          kavaData: KavaPluginData,
+                                          request: KalturaRequestBuilder) {
+        if config.mediaInfo?.type != MediaType.unknown {
+            if config.mediaInfo?.type == MediaType.vod {
+                handleVod(request: request)
+            } else if config.mediaInfo?.type == MediaType.live {
+                handleLive(kavaData: kavaData, request: request)
+            }
+        } else {
+            switch config.playbackType {
+            case KavaPluginConfig.PlaybackType.unknown:
+                assertionFailure("media type on KavaPluginConfig is not set when providers are not used.")
+            case KavaPluginConfig.PlaybackType.live:
+                handleLive(kavaData: kavaData, request: request)
+            case KavaPluginConfig.PlaybackType.vod:
+                handleVod(request: request)
+            }
+        }
+    }
+    
+    static private func handleVod(request: KalturaRequestBuilder) {
+        request.setParam(key: "playbackType", value: "vod")
+    }
+    
+    static private func handleLive(kavaData: KavaPluginData,
+                                   request: KalturaRequestBuilder) {
+        if PKMediaInfo.isDVR(duration: kavaData.mediaDuration, currentTime: kavaData.mediaCurrentTime) {
+            request.setParam(key: "playbackType", value: "dvr")
+        } else {
+            request.setParam(key: "playbackType", value: "live")
         }
     }
     

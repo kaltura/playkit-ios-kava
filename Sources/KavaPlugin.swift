@@ -67,7 +67,6 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
     var kavaData = KavaPluginData()
     /// A sequence number which describe the order of events in a viewing session.
     private var eventIndex = 1
-    private var sessionStartTime: String?
     
     /************************************************************/
     // MARK: PKPlugin
@@ -94,6 +93,8 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
         self.resetPlayerFlags()
         self.unregisterFromBoundaries()
         self.stopViewTimer()
+        self.config.sessionId = self.player?.sessionId
+        self.config.entryId = self.player?.mediaEntry?.id
     }
     
     public override func onUpdateConfig(pluginConfig: Any) {
@@ -188,23 +189,8 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
         }
     }
     
-    func convertToPercentage(type: KavaEventType) -> Int {
-        switch type {
-        case .playReached25Percent:
-            return 25
-        case .playReached50Percent:
-            return 50
-        case .playReached75Percent:
-            return 75
-        case .playReached100Percent:
-            return 100
-        default:
-            return 0
-        }
-    }
-    
     func sendAnalyticsEvent(event: KavaEventType, data: Any? = nil) {
-        guard let player = self.player, let mediaEntry = player.mediaEntry else {
+        guard let player = self.player else {
             PKLog.warning("Player/ MediaEntry is nil")
             
             return    
@@ -220,25 +206,24 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
         self.kavaData.mediaCurrentTime = player.currentTime
         
         guard let builder: KalturaRequestBuilder =
-            KavaService.get(config: self.config,
-                            entryId: mediaEntry.id,
-                            sessionId: player.sessionId,
-                            eventType: event.rawValue,
-                            playbackType: self.kavaData.playbackType,
-                            position: player.currentTime,
-                            eventIndex: self.eventIndex,
-                            sessionStartTime: self.sessionStartTime,
-                            kavaData: self.kavaData)
-            else { return }
-
+            KavaHelper.get(config: self.config,
+                           eventType: event.rawValue,
+                           eventIndex: self.eventIndex,
+                           kavaData: self.kavaData)
+            else {
+                PKLog.warning("KalturaRequestBuilder is nil")
+                return
+                
+        }
+        
         builder.set { (response: Response) in
             PKLog.debug("Response: \(String(describing: response))")
             
-            if (self.sessionStartTime == nil) {
-                self.sessionStartTime = response.data as? String
+            if (self.config.sessionStartTime == nil) {
+                self.config.sessionStartTime = response.data as? String
             }
         }
-
+        
         USRExecutor.shared.send(request: builder.build())
         self.eventIndex+=1
     }
@@ -262,5 +247,22 @@ extension PKEvent {
     /// Report Value, PKEvent Data Accessor
     @objc public var kavaMessage: String? {
         return self.data?[KavaEvent.messageKey] as? String
+    }
+}
+
+extension KavaPlugin {
+    func convertToPercentage(type: KavaEventType) -> Int {
+        switch type {
+        case .playReached25Percent:
+            return 25
+        case .playReached50Percent:
+            return 50
+        case .playReached75Percent:
+            return 75
+        case .playReached100Percent:
+            return 100
+        default:
+            return 0
+        }
     }
 }

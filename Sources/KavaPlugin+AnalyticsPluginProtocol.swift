@@ -170,8 +170,6 @@ extension KavaPlugin: AnalyticsPluginProtocol {
         if let source = mediaSource {
             self.kavaData.selectedSource = source
             self.updateDeliveryType(mediaFormat: source.mediaFormat)
-            // Reset flags when source was changed
-            self.resetPlayerFlags()
         }
     }
     

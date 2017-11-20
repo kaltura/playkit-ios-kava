@@ -54,6 +54,14 @@ import PlayKit
     @objc public var playbackType: PlaybackType = .unknown
     
     /************************************************************/
+    // MARK: Internal Properties
+    /************************************************************/
+    
+    var entryId: String?
+    var sessionId: String?
+    var sessionStartTime: String?
+    
+    /************************************************************/
     // MARK: - Initialization
     /************************************************************/
     

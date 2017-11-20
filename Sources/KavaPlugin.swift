@@ -109,7 +109,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
     }
     
     public override func destroy() {
-        self.messageBus?.removeObserver(self, events: playerEventsToRegister)
+        self.unregisterEvents()
         self.unregisterFromBoundaries()
         self.stopViewTimer()
         super.destroy()

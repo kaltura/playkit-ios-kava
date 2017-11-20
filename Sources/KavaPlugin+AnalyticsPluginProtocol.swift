@@ -37,142 +37,57 @@ extension KavaPlugin: AnalyticsPluginProtocol {
             PlayerEvent.sourceSelected,
             PlayerEvent.ended,
             PlayerEvent.playbackInfo,
-            PlayerEvent.trackChanged,
+            PlayerEvent.textTrackChanged,
+            PlayerEvent.videoTrackChanged,
             PlayerEvent.error
         ]
     }
     
     public func registerEvents() {
-        PKLog.debug("register player events")
-        
-        self.playerEventsToRegister.forEach { event in
-            PKLog.debug("Register event: \(event.self)")
+        self.playerEventsToRegister.forEach { playerEvent in
+            PKLog.debug("Register event: \(playerEvent.self)")
             
-            switch event {
-            case let e where e.self == PlayerEvent.stateChanged:
-                self.messageBus?.addObserver(self, events: [e.self]) { [weak self] event in
-                    guard let strongSelf = self else { return }
-                    PKLog.debug("state changed event: \(event)")
-                    if type(of: event) == PlayerEvent.stateChanged {
-                        strongSelf.handleStateChanged(event: event)
-                    }
+            self.messageBus?.addObserver(self, events: [playerEvent], block: { [weak self] event in
+                guard let strongSelf = self else { return }
+                
+                switch playerEvent {
+                case let e where e.self == PlayerEvent.stateChanged:
+                    strongSelf.handleStateChanged(event: event)
+                case let e where e.self == PlayerEvent.loadedMetadata:
+                    strongSelf.handleLoadedMetadata()
+                case let e where e.self == PlayerEvent.play:
+                    strongSelf.handlePlay()
+                case let e where e.self == PlayerEvent.pause:
+                    strongSelf.handlePause()
+                case let e where e.self == PlayerEvent.playing:
+                    strongSelf.handlePlaying()
+                case let e where e.self == PlayerEvent.seeking:
+                    strongSelf.handleSeeking(targetSeekPosition: event.targetSeekPosition)
+                case let e where e.self == PlayerEvent.sourceSelected:
+                    strongSelf.handleSourceSelected(mediaSource: event.mediaSource)
+                case let e where e.self == PlayerEvent.ended:
+                    strongSelf.handleEnded()
+                case let e where e.self == PlayerEvent.videoTrackChanged:
+                    strongSelf.handleVideoTrackChanged(videoTrack: event.bitrate)
+                case let e where e.self == PlayerEvent.textTrackChanged:
+                    strongSelf.handleTextTrackChanged(textTrack: event.selectedTrack)
+                case let e where e.self == PlayerEvent.error:
+                    strongSelf.handleError(error: event.error)
+                default: assertionFailure("all events must be handled")
                 }
                 
-            case let e where e.self == PlayerEvent.loadedMetadata:
-                self.messageBus?.addObserver(self, events: [e.self], block: { [weak self] (event) in
-                    guard let strongSelf = self else { return }
-                    PKLog.debug("loadedMetadata event: \(event)")
-                    strongSelf.kavaData.playbackType = strongSelf.getPlaybackType()
-                    strongSelf.sendMediaLoaded()
-                })
-                
-            case let e where e.self == PlayerEvent.play:
-                self.messageBus?.addObserver(self, events: [e.self], block: { [weak self] (event) in
-                    guard let strongSelf = self else { return }
-                    PKLog.debug("play event: \(event)")
-                    strongSelf.sendAnalyticsEvent(event: KavaEventType.playRequest)
-                    
-                    if strongSelf.sentPlaybackPoints[KavaEventType.playReached100Percent] == true {
-                        strongSelf.sendAnalyticsEvent(event: KavaEventType.replay)
-                    }
-                })
-                
-            case let e where e.self == PlayerEvent.pause:
-                self.messageBus?.addObserver(self, events: [e.self], block: { [weak self] (event) in
-                    guard let strongSelf = self else { return }
-                    PKLog.debug("pause event: \(event)")
-                    strongSelf.kavaData.isPaused = true
-
-                    strongSelf.sendAnalyticsEvent(event: KavaEventType.pause)
-                    strongSelf.reportView()
-                    strongSelf.stopViewTimer()
-                })
-                
-            case let e where e.self == PlayerEvent.playing:
-                self.messageBus?.addObserver(self, events: [e.self], block: { [weak self] (event) in
-                    guard let strongSelf = self else { return }
-                    PKLog.debug("playing event: \(event)")
-                    if strongSelf.isFirstPlay {
-                        strongSelf.isFirstPlay = false
-                        strongSelf.sendAnalyticsEvent(event: KavaEventType.play)
-                    } else if strongSelf.kavaData.isPaused {
-                        strongSelf.sendAnalyticsEvent(event: KavaEventType.resume)
-                    }
-                    
-                    strongSelf.kavaData.isPaused = false
-                    strongSelf.setupViewTimer()
-                })
-                
-            case let e where e.self == PlayerEvent.seeking:
-                self.messageBus?.addObserver(self, events: [e.self], block: { [weak self] (event) in
-                    PKLog.debug("seeking event: \(event)")
-                    
-                    guard let strongSelf = self else { return }
-                    
-                    if let seekPosition = event.targetSeekPosition {
-                        strongSelf.kavaData.targetSeekPosition = Double(truncating: seekPosition)
-                    }
-                    
-                    strongSelf.sendAnalyticsEvent(event: KavaEventType.seek)
-                })
-                
-            case let e where e.self == PlayerEvent.sourceSelected:
-                self.messageBus?.addObserver(self, events: [e.self], block: { [weak self] (event) in
-                    guard let strongSelf = self else { return }
-                    PKLog.debug("sourceSelected event: \(event)")
-                    strongSelf.kavaData.selectedSource = event.mediaSource
-                    strongSelf.updateDeliveryType(mediaFormat: (strongSelf.kavaData.selectedSource?.mediaFormat)!)
-                    // Reset flags when source was changed
-                    strongSelf.resetPlayerFlags()
-                })
-                
-            case let e where e.self == PlayerEvent.ended:
-                self.messageBus?.addObserver(self, events: [e.self], block: { [weak self] (event) in
-                    guard let strongSelf = self else { return }
-                    PKLog.debug("ended event: \(event)")
-                    
-                    strongSelf.sendPercentageReachedEvent(percentage: 100)
-                    strongSelf.reportView()
-                    strongSelf.stopViewTimer()
-                    strongSelf.resetPlayerFlags()
-                })
-                
-            case let e where e.self == PlayerEvent.playbackInfo:
-                self.messageBus?.addObserver(self, events: [e.self], block: { [weak self] (event) in
-                    guard let strongSelf = self else { return }
-                    PKLog.debug("playbackInfo event: \(event)")
-                    strongSelf.kavaData.indicatedBitrate = event.playbackInfo?.indicatedBitrate
-                })
+            })
             
-            case let e where e.self == PlayerEvent.trackChanged:
-                self.messageBus?.addObserver(self, events: [e.self], block: { [weak self] (event) in
-                    guard let strongSelf = self else { return }
-                    PKLog.debug("trackChanged event: \(event)")
-                    if let track = event.selectedTrack {
-                        if (track.title.contains("event.selectedTrack?.title")) {
-                            strongSelf.kavaData.currentCaptionLanguage = event.selectedTrack?.language
-                            strongSelf.sendAnalyticsEvent(event: KavaEventType.captions)
-                        }
-                    }
-                })
-                
-            case let e where e.self == PlayerEvent.error:
-                self.messageBus?.addObserver(self, events: [e.self], block: { [weak self] (event) in
-                    guard let strongSelf = self else { return }
-                    PKLog.debug("PlayerEvent error event: \(event)")
-                    strongSelf.kavaData.errorCode = (event.error?.code)!
-                    strongSelf.sendAnalyticsEvent(event: KavaEventType.error)
-                })
-            default: assertionFailure("all events must be handled")
-            }
+            self.messageBus?.addObserver(self, events: [AdEvent.error], block: { [weak self] (event) in
+                guard let strongSelf = self else { return }
+                strongSelf.handleError(error: event.error)
+            })
         }
-        
-        self.messageBus?.addObserver(self, events: [AdEvent.error], block: { [weak self] (event) in
-            guard let strongSelf = self else { return }
-            PKLog.debug("AdEvent error event: \(event)")
-            strongSelf.kavaData.errorCode = (event.error?.code)!
-            strongSelf.sendAnalyticsEvent(event: KavaEventType.error)
-        })
+    }
+    
+    public func unregisterEvents() {
+        self.messageBus?.removeObserver(self, events: playerEventsToRegister)
+        self.messageBus?.removeObserver(self, events: [AdEvent.error])
     }
     
     /************************************************************/
@@ -180,9 +95,12 @@ extension KavaPlugin: AnalyticsPluginProtocol {
     /************************************************************/
     
     private func handleStateChanged(event: PKEvent) {
+        PKLog.debug("state changed event: \(event)")
+        
         switch event.newState {
         case .ready:
-             PKLog.info("media ready")
+            PKLog.info("media ready")
+            
             if let _ = bufferingStartTime {
                 self.kavaData.totalBufferingInCurrentInterval += -bufferingStartTime!.timeIntervalSinceNow
                 bufferingStartTime = nil
@@ -193,6 +111,103 @@ extension KavaPlugin: AnalyticsPluginProtocol {
         case .buffering:
             bufferingStartTime = Date()
         default: break
+        }
+    }
+    
+    private func handleLoadedMetadata() {
+        PKLog.debug("loadedMetadata event")
+        
+        self.kavaData.playbackType = self.getPlaybackType()
+        self.sendMediaLoaded()
+    }
+    
+    private func handlePlay() {
+        PKLog.debug("play event")
+        
+        self.sendAnalyticsEvent(event: KavaEventType.playRequest)
+        
+        if self.sentPlaybackPoints[KavaEventType.playReached100Percent] == true {
+            self.sendAnalyticsEvent(event: KavaEventType.replay)
+        }
+    }
+    
+    private func handlePause() {
+        PKLog.debug("pause event")
+        
+        self.kavaData.isPaused = true
+        self.sendAnalyticsEvent(event: KavaEventType.pause)
+        self.reportView()
+        self.stopViewTimer()
+    }
+    
+    private func handlePlaying() {
+        PKLog.debug("playing event")
+        
+        if self.isFirstPlay {
+            self.isFirstPlay = false
+            self.sendAnalyticsEvent(event: KavaEventType.play)
+        } else if self.kavaData.isPaused {
+            self.sendAnalyticsEvent(event: KavaEventType.resume)
+        }
+        
+        self.kavaData.isPaused = false
+        self.setupViewTimer()
+    }
+    
+    private func handleSeeking(targetSeekPosition: NSNumber?) {
+        PKLog.debug("seeking event")
+        
+        if let seekPosition = targetSeekPosition {
+            self.kavaData.targetSeekPosition = Double(truncating: seekPosition)
+        }
+        
+        self.sendAnalyticsEvent(event: KavaEventType.seek)
+    }
+    
+    private func handleSourceSelected(mediaSource: PKMediaSource?) {
+        PKLog.debug("sourceSelected event")
+        
+        if let source = mediaSource {
+            self.kavaData.selectedSource = source
+            self.updateDeliveryType(mediaFormat: source.mediaFormat)
+            // Reset flags when source was changed
+            self.resetPlayerFlags()
+        }
+    }
+    
+    private func handleEnded() {
+        PKLog.debug("ended event")
+        
+        self.sendPercentageReachedEvent(percentage: 100)
+        self.reportView()
+        self.stopViewTimer()
+    }
+    
+    private func handleVideoTrackChanged(videoTrack: NSNumber?) {
+        PKLog.debug("videoTrackChanged event")
+        
+        if let bitrate = videoTrack {
+            self.kavaData.indicatedBitrate = Double(truncating: bitrate)
+        }
+    }
+    
+    private func handleTextTrackChanged(textTrack: Track?) {
+        PKLog.debug("textTrackChanged event")
+        
+        if let track = textTrack {
+            if (track.language != nil) {
+                self.kavaData.currentCaptionLanguage = track.language
+                self.sendAnalyticsEvent(event: KavaEventType.captions)
+            }
+        }
+    }
+    
+    private func handleError(error: NSError?) {
+        PKLog.debug("error event")
+        
+        if let err = error {
+            self.kavaData.errorCode = err.code
+            self.sendAnalyticsEvent(event: KavaEventType.error)
         }
     }
     

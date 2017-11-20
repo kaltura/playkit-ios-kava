@@ -22,21 +22,21 @@ class KavaHelper {
         if let request: KalturaRequestBuilder = KalturaRequestBuilder(url: config.baseUrl, service: nil, action: nil) {
             
             addMediaParams(config: config,
-                                      request: request)
+                           request: request)
             
             request
                 .setParam(key: "eventType", value: String(eventType))
                 .setParam(key: "eventIndex", value: String(eventIndex))
                 .setParam(key: "deliveryType", value: kavaData.deliveryType)
             
-            KavaHelper.addMediaTypeParam(config: config,
-                                         kavaData: kavaData,
-                                         request: request)
+            addMediaTypeParam(config: config,
+                              kavaData: kavaData,
+                              request: request)
             addDynamicParams(eventType: eventType,
-                                        kavaData: kavaData,
-                                        request: request)
-           addOptionalParams(config: config,
-                                         request: request)
+                             kavaData: kavaData,
+                             request: request)
+            addOptionalParams(config: config,
+                              request: request)
             
             // Response in this case is not in Json format
             // It's set to StringSerializer otherwise respone is errored.

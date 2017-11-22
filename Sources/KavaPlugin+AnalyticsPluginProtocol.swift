@@ -42,45 +42,41 @@ extension KavaPlugin: AnalyticsPluginProtocol {
         ]
     }
     
-    public func registerEvents() {
-        self.playerEventsToRegister.forEach { playerEvent in
-            PKLog.debug("Register event: \(playerEvent.self)")
+ public func registerEvents() {
+        self.messageBus?.addObserver(self, events: playerEventsToRegister, block: { [weak self] event in
+            guard let strongSelf = self else { return }
             
-            self.messageBus?.addObserver(self, events: [playerEvent], block: { [weak self] event in
-                guard let strongSelf = self else { return }
-                
-                switch playerEvent {
-                case let e where e.self == PlayerEvent.stateChanged:
-                    strongSelf.handleStateChanged(event: event)
-                case let e where e.self == PlayerEvent.loadedMetadata:
-                    strongSelf.handleLoadedMetadata()
-                case let e where e.self == PlayerEvent.play:
-                    strongSelf.handlePlay()
-                case let e where e.self == PlayerEvent.pause:
-                    strongSelf.handlePause()
-                case let e where e.self == PlayerEvent.playing:
-                    strongSelf.handlePlaying()
-                case let e where e.self == PlayerEvent.seeking:
-                    strongSelf.handleSeeking(targetSeekPosition: event.targetSeekPosition)
-                case let e where e.self == PlayerEvent.sourceSelected:
-                    strongSelf.handleSourceSelected(mediaSource: event.mediaSource)
-                case let e where e.self == PlayerEvent.ended:
-                    strongSelf.handleEnded()
-                case let e where e.self == PlayerEvent.videoTrackChanged:
-                    strongSelf.handleVideoTrackChanged(videoTrack: event.bitrate)
-                case let e where e.self == PlayerEvent.textTrackChanged:
-                    strongSelf.handleTextTrackChanged(textTrack: event.selectedTrack)
-                case let e where e.self == PlayerEvent.error:
-                    strongSelf.handleError(error: event.error)
-                default: assertionFailure("all events must be handled")
-                }
-            })
-            
-            self.messageBus?.addObserver(self, events: [AdEvent.error], block: { [weak self] (event) in
-                guard let strongSelf = self else { return }
+            if type(of: event) == PlayerEvent.stateChanged {
+                strongSelf.handleStateChanged(event: event)
+            } else if type(of: event) == PlayerEvent.loadedMetadata {
+                strongSelf.handleLoadedMetadata()
+            } else if type(of: event) == PlayerEvent.play {
+                strongSelf.handlePlay()
+            } else if type(of: event) == PlayerEvent.pause {
+                strongSelf.handlePause()
+            } else if type(of: event) == PlayerEvent.playing {
+                strongSelf.handlePlaying()
+            } else if type(of: event) == PlayerEvent.seeking {
+                strongSelf.handleSeeking(targetSeekPosition: event.targetSeekPosition)
+            } else if type(of: event) == PlayerEvent.sourceSelected {
+                strongSelf.handleSourceSelected(mediaSource: event.mediaSource)
+            } else if type(of: event) == PlayerEvent.ended {
+                strongSelf.handleEnded()
+            } else if type(of: event) == PlayerEvent.videoTrackChanged {
+                strongSelf.handleVideoTrackChanged(videoTrack: event.bitrate)
+            } else if type(of: event) == PlayerEvent.textTrackChanged {
+                strongSelf.handleTextTrackChanged(textTrack: event.selectedTrack)
+            } else if type(of: event) == PlayerEvent.error {
                 strongSelf.handleError(error: event.error)
-            })
-        }
+            } else {
+                assertionFailure("all player events must be handled")
+            }
+        })
+        
+        self.messageBus?.addObserver(self, events: [AdEvent.error], block: { [weak self] (event) in
+            guard let strongSelf = self else { return }
+            strongSelf.handleError(error: event.error)
+        })
     }
     
     public func unregisterEvents() {

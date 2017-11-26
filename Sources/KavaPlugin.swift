@@ -60,7 +60,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
     }
     
     var config: KavaPluginConfig
-    var sentPlaybackPoints: [KavaEventType : Bool] = cleanPlaybackPoints()
+    var sentPlaybackPoints: [KavaEventType : Bool] = KavaPlugin.cleanPlaybackPoints()
     var boundaryObservationToken: UUID?
     var viewTimer: Timer?
     var bufferingStartTime: Date?

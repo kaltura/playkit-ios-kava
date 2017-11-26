@@ -141,6 +141,17 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
     }
     
     func setupViewTimer() {
+        // If media is live don't setup view timer
+        if let player = self.player {
+            // see if is live via provider
+            if player.isLive() {
+                return
+            // see if live via config
+            } else if let isLive = config.isLive, isLive == true {
+                return
+            }
+        }
+        
         if viewTimer == nil {
             viewTimer = Timer.scheduledTimer(timeInterval: 10, target: self, selector: #selector(reportView), userInfo: nil, repeats: true)
         }
@@ -152,6 +163,11 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
     }
     
     @objc func reportView() {
+        // If timer is nil, no reason to report.
+        if self.viewTimer == nil {
+            return
+        }
+        
         if let _ = bufferingStartTime {
             self.kavaData.totalBufferingInCurrentInterval += -bufferingStartTime!.timeIntervalSinceNow
             bufferingStartTime = Date()

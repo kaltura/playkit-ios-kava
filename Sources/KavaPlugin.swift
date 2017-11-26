@@ -93,9 +93,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
         self.resetPlayerFlags()
         self.unregisterFromBoundaries()
         self.stopViewTimer()
-        self.config.sessionId = self.player?.sessionId
-        self.config.entryId = self.player?.mediaEntry?.id
-        self.config.mediaInfo = self.player?.mediaInfo
+        self.setMediaConfigParams()
     }
     
     public override func onUpdateConfig(pluginConfig: Any) {
@@ -210,7 +208,8 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
             KavaHelper.get(config: self.config,
                            eventType: event.rawValue,
                            eventIndex: self.eventIndex,
-                           kavaData: self.kavaData)
+                           kavaData: self.kavaData,
+                           player: player)
             else {
                 PKLog.warning("KalturaRequestBuilder is nil")
                 return
@@ -229,14 +228,20 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
         self.eventIndex+=1
     }
     
-    func getPlaybackType() -> String? {
-        if self.player?.mediaEntry?.mediaType == MediaType.vod {
-            return "vod"
-        } else if self.player?.mediaEntry?.mediaType == MediaType.live {
-            return PKMediaInfo.isDVR(duration: self.player?.duration, currentTime: self.player?.currentTime) ? "dvr" : "live"
-        }
+    /************************************************************/
+    // MARK: - Private Functions
+    /************************************************************/
+    
+    /// On media changed config internal params are set.
+    private func setMediaConfigParams() {
+        self.config.sessionId = self.player?.sessionId
+        self.config.entryId = self.player?.mediaEntry?.id
+        self.config.mediaFormat = self.player?.mediaFormat
         
-        return nil
+        // If media is vod, set isLive param only once.
+        if let player = self.player, !player.isLive() {
+            self.config.isLive = player.isLive()
+        }
     }
 }
 

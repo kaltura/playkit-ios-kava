@@ -52,6 +52,16 @@ class KavaPluginData {
     /// indicates playback type (vod/ live)
     public var playbackType: String?
     // These params help identify DVR
-    public var mediaDuration: Double?
-    public var mediaCurrentTime: Double?
+    var mediaDuration: Double?
+    var mediaCurrentTime: Double?
+}
+
+extension KavaPluginData {
+    static func hasDVR(duration: Double,
+                       currentTime: Double,
+                       dvrThreshold: Int) -> Bool {
+        let distanceFromLive = duration - currentTime
+        
+        return distanceFromLive >= Double(dvrThreshold)
+    }
 }

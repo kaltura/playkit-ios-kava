@@ -110,8 +110,6 @@ extension KavaPlugin: AnalyticsPluginProtocol {
     
     private func handleLoadedMetadata() {
         PKLog.debug("loadedMetadata event")
-        
-        self.kavaData.playbackType = self.getPlaybackType()
         self.sendMediaLoaded()
     }
     

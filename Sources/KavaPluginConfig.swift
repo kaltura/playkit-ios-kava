@@ -51,7 +51,9 @@ import PlayKit
     @objc public var customVar1, customVar2, customVar3: String?
     /// If not using providers user must mention playback type (live/ vod)
     /// Set by defualt to unknown
-    @objc public var playbackType: PlaybackType = .unknown
+    @objc public var playbackType: PlaybackType = .unknown  
+    /// DVR Threshold set by default to 2 minutes.
+    @objc public var dvrThreshold = 120
     
     /************************************************************/
     // MARK: Internal Properties
@@ -60,7 +62,9 @@ import PlayKit
     var entryId: String?
     var sessionId: String?
     var sessionStartTime: String?
-    var mediaInfo: PKMediaInfo?
+    var mediaFormat: PKMediaSource.MediaFormat?
+    var isLive: Bool?
+    var hasDVR: Bool?
     
     /************************************************************/
     // MARK: - Initialization

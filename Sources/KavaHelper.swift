@@ -59,6 +59,8 @@ class KavaHelper {
     /// Adds media params that won't be changed until media is updated.
     static private func addMediaParams(config: KavaPluginConfig,
                                        request: KalturaRequestBuilder) {
+        request.setParam(key: "service", value: "analytics")
+        request.setParam(key: "action", value: "trackEvent")
         request.setParam(key: "partnerId", value: String(config.partnerId))
         // putting ! is safe since on KavaPluginConfig
         // on init func referrer gets value.

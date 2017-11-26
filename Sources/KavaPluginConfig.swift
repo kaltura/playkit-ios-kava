@@ -86,7 +86,7 @@ import PlayKit
         
         if let referrerToBase64 = referrer {
             if self.isValidReferrer(referrerToBase64) {
-                self.referrer = referrerToBase64.toBase64()
+                self.referrer = referrerToBase64
             }
         } else {
             PKLog.warning("Invalid referrer argument. Should start with app:// or http:// or https://")
@@ -96,6 +96,9 @@ import PlayKit
                 PKLog.warning("App id is not set")
             }   
         }
+        
+        // convert base64
+        self.referrer = self.referrer?.toBase64()
     }
     
     /************************************************************/

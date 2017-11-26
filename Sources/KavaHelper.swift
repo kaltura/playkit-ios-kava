@@ -65,8 +65,8 @@ class KavaHelper {
         // putting ! is safe since on KavaPluginConfig
         // on init func referrer gets value.
         request.setParam(key: "referrer", value: config.referrer!)
-        request.setParam(key: "clientVer", value: "kwidget:v\(PlayKitManager.clientTag)")
-        request.setParam(key: "clientTag", value: "kwidget:v\(PlayKitManager.clientTag)")
+        request.setParam(key: "clientVer", value: "\(PlayKitManager.clientTag)")
+        request.setParam(key: "clientTag", value: "\(PlayKitManager.clientTag)")
         
         if let entryId = config.entryId {
             request.setParam(key: "entryId", value: entryId)

@@ -1,0 +1,12 @@
+CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES = YES
+FRAMEWORK_SEARCH_PATHS = $(inherited) "${PODS_ROOT}"/** "$PODS_CONFIGURATION_BUILD_DIR/KalturaNetKit" "$PODS_CONFIGURATION_BUILD_DIR/Log" "$PODS_CONFIGURATION_BUILD_DIR/PlayKit" "$PODS_CONFIGURATION_BUILD_DIR/PlayKitKava" "$PODS_CONFIGURATION_BUILD_DIR/PlayKitUtils" "$PODS_CONFIGURATION_BUILD_DIR/SwiftyJSON" "$PODS_CONFIGURATION_BUILD_DIR/SwiftyXMLParser"
+GCC_PREPROCESSOR_DEFINITIONS = $(inherited) COCOAPODS=1
+LD_RUNPATH_SEARCH_PATHS = $(inherited) '@executable_path/Frameworks' '@loader_path/Frameworks' '@executable_path/../../Frameworks'
+LIBRARY_SEARCH_PATHS = $(inherited) "${PODS_ROOT}"/**
+OTHER_CFLAGS = $(inherited) -iquote "$PODS_CONFIGURATION_BUILD_DIR/KalturaNetKit/KalturaNetKit.framework/Headers" -iquote "$PODS_CONFIGURATION_BUILD_DIR/Log/Log.framework/Headers" -iquote "$PODS_CONFIGURATION_BUILD_DIR/PlayKit/PlayKit.framework/Headers" -iquote "$PODS_CONFIGURATION_BUILD_DIR/PlayKitKava/PlayKitKava.framework/Headers" -iquote "$PODS_CONFIGURATION_BUILD_DIR/PlayKitUtils/PlayKitUtils.framework/Headers" -iquote "$PODS_CONFIGURATION_BUILD_DIR/SwiftyJSON/SwiftyJSON.framework/Headers" -iquote "$PODS_CONFIGURATION_BUILD_DIR/SwiftyXMLParser/SwiftyXMLParser.framework/Headers"
+OTHER_LDFLAGS = $(inherited) -framework "KalturaNetKit" -framework "Log" -framework "PlayKit" -framework "PlayKitKava" -framework "PlayKitUtils" -framework "SwiftyJSON" -framework "SwiftyXMLParser"
+OTHER_SWIFT_FLAGS = $(inherited) "-D" "COCOAPODS"
+PODS_BUILD_DIR = $BUILD_DIR
+PODS_CONFIGURATION_BUILD_DIR = $PODS_BUILD_DIR/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)
+PODS_PODFILE_DIR_PATH = ${SRCROOT}/.
+PODS_ROOT = ${SRCROOT}/Pods

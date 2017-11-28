@@ -107,7 +107,14 @@ import PlayKit
     
     private func isValidReferrer(_ referrer: String) -> Bool {
         let validPrefixes = ["app://", "http://", "https://"]
-        return validPrefixes.contains(referrer)
+        var isValid = false
+        for p in validPrefixes {
+            if referrer.hasPrefix(p) {
+                isValid = true
+                break
+            }
+        }
+        return isValid
     }
 }
 

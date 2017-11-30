@@ -11,6 +11,7 @@ Pod::Spec.new do |s|
   s.source_files = 'Sources/**/*'
   s.dependency 'PlayKit/Core'
   s.dependency 'PlayKit/AnalyticsCommon'
+  s.dependency 'KalturaNetKit'
 end
 
 # To add playkit kava as dependecy use: s.dependency 'PlayKitKava', 'version_number'

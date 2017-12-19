@@ -10,6 +10,7 @@
 
 import PlayKit
 import KalturaNetKit
+import SwiftyJSON
 
 /************************************************************/
 // MARK: - Playback Points Array
@@ -77,14 +78,54 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
     }
     
     public required init(player: Player, pluginConfig: Any?, messageBus: MessageBus) throws {
-        guard let config = pluginConfig as? KavaPluginConfig else {
+        
+        var _config: KavaPluginConfig?
+        if let json = pluginConfig as? JSON {
+            _config = KavaPlugin.parse(json: json)
+        } else {
+            _config = pluginConfig as? KavaPluginConfig
+        }
+        
+        guard let config = _config else {
             PKLog.error("missing plugin config or wrong plugin class type")
-            throw PKPluginError.missingPluginConfig(pluginName: KavaPlugin.pluginName)
+            throw PKPluginError.missingPluginConfig(pluginName: KavaPlugin.pluginName).asNSError
         }
         
         self.config = config
-        try super.init(player: player, pluginConfig: self.config, messageBus: messageBus)
+        try super.init(player: player, pluginConfig: pluginConfig, messageBus: messageBus)
         self.registerEvents()
+    }
+    
+    private static func parse(json: JSON) -> KavaPluginConfig? {
+        guard let jsonDictionary = json.dictionary else { return nil }
+        
+        guard let partnerId = jsonDictionary["partnerId"]?.int else { return nil }
+        
+        let config = KavaPluginConfig(partnerId: partnerId, ks: nil, playbackContext: nil, referrer: nil, customVar1: nil, customVar2: nil, customVar3: nil)
+        
+        if let baseUrl = jsonDictionary["baseUrl"]?.string, baseUrl != "" {
+            config.baseUrl = baseUrl
+        }
+        if let uiconfId = jsonDictionary["uiconfId"]?.int {
+            config.uiconfId = uiconfId
+        }
+        if let playbackContext = jsonDictionary["playbackContext"]?.string {
+            config.playbackContext = playbackContext
+        }
+        if let referrer = jsonDictionary["referrer"]?.string {
+            config.referrer = referrer
+        }
+        if let customVar1 = jsonDictionary["customVar1"]?.string {
+            config.customVar1 = customVar1
+        }
+        if let customVar2 = jsonDictionary["customVar2"]?.string {
+            config.customVar2 = customVar2
+        }
+        if let customVar3 = jsonDictionary["customVar3"]?.string {
+            config.customVar3 = customVar3
+        }
+        
+        return config
     }
     
     public override func onUpdateMedia(mediaConfig: MediaConfig) {

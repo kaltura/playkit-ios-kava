@@ -10,6 +10,7 @@
 
 import Foundation
 import PlayKit
+import SwiftyJSON
 
 /************************************************************/
 // MARK: KavaPluginConfig
@@ -99,6 +100,38 @@ import PlayKit
         
         // convert base64
         self.referrer = self.referrer?.toBase64()
+    }
+    
+    public static func parse(json: JSON) -> KavaPluginConfig? {
+        guard let jsonDictionary = json.dictionary else { return nil }
+        
+        guard let partnerId = jsonDictionary["partnerId"]?.int else { return nil }
+        
+        let config = KavaPluginConfig(partnerId: partnerId, ks: nil, playbackContext: nil, referrer: nil, customVar1: nil, customVar2: nil, customVar3: nil)
+        
+        if let baseUrl = jsonDictionary["baseUrl"]?.string, baseUrl != "" {
+            config.baseUrl = baseUrl
+        }
+        if let uiconfId = jsonDictionary["uiconfId"]?.int {
+            config.uiconfId = uiconfId
+        }
+        if let playbackContext = jsonDictionary["playbackContext"]?.string {
+            config.playbackContext = playbackContext
+        }
+        if let referrer = jsonDictionary["referrer"]?.string {
+            config.referrer = referrer
+        }
+        if let customVar1 = jsonDictionary["customVar1"]?.string {
+            config.customVar1 = customVar1
+        }
+        if let customVar2 = jsonDictionary["customVar2"]?.string {
+            config.customVar2 = customVar2
+        }
+        if let customVar3 = jsonDictionary["customVar3"]?.string {
+            config.customVar3 = customVar3
+        }
+        
+        return config
     }
     
     /************************************************************/

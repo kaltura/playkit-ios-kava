@@ -77,7 +77,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
         return "KavaPlugin"
     }
     
-    public required init(player: Player, pluginConfig: Any?, messageBus: MessageBus) throws {
+    public required init(player: Player, pluginConfig: Any?, messageBus: MessageBus, tokenReplacer: TokenReplacer?) throws {
         
         var _config: KavaPluginConfig?
         if let json = pluginConfig as? JSON {
@@ -92,7 +92,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
         }
         
         self.config = config
-        try super.init(player: player, pluginConfig: pluginConfig, messageBus: messageBus)
+        try super.init(player: player, pluginConfig: pluginConfig, messageBus: messageBus, tokenReplacer: tokenReplacer)
         self.registerEvents()
     }
     

@@ -116,6 +116,10 @@ extension KavaPlugin: AnalyticsPluginProtocol {
     private func handlePlay() {
         PKLog.debug("play event")
         
+        if self.isFirstPlay {
+            self.joinTimeStart = Date().timeIntervalSince1970
+        }
+        
         self.sendAnalyticsEvent(event: KavaEventType.playRequest)
         
         if self.sentPlaybackPoints[KavaEventType.playReached100Percent] == true {
@@ -125,23 +129,21 @@ extension KavaPlugin: AnalyticsPluginProtocol {
     
     private func handlePause() {
         PKLog.debug("pause event")
-        
         self.kavaData.isPaused = true
         self.sendAnalyticsEvent(event: KavaEventType.pause)
-        self.reportView()
         self.stopViewTimer()
     }
     
     private func handlePlaying() {
         PKLog.debug("playing event")
-        
+        self.kavaData.joinTime = nil
         if self.isFirstPlay {
             self.isFirstPlay = false
+            self.kavaData.joinTime = Date().timeIntervalSince1970 - self.joinTimeStart
             self.sendAnalyticsEvent(event: KavaEventType.play)
         } else if self.kavaData.isPaused {
             self.sendAnalyticsEvent(event: KavaEventType.resume)
         }
-        
         self.kavaData.isPaused = false
         self.setupViewTimer()
     }
@@ -167,7 +169,6 @@ extension KavaPlugin: AnalyticsPluginProtocol {
     
     private func handleEnded() {
         PKLog.debug("ended event")
-        
         self.sendPercentageReachedEvent(percentage: 100)
         self.reportView()
         self.stopViewTimer()
@@ -177,7 +178,8 @@ extension KavaPlugin: AnalyticsPluginProtocol {
         PKLog.debug("videoTrackChanged event")
         
         if let bitrate = videoTrack {
-            self.kavaData.indicatedBitrate = Double(truncating: bitrate)
+            self.indicatedBitrate = bitrate.doubleValue
+            self.sendAnalyticsEvent(event: KavaEventType.flavorSwitched)
         }
     }
     
@@ -204,7 +206,6 @@ extension KavaPlugin: AnalyticsPluginProtocol {
     private func sendMediaLoaded() {
         if !self.kavaData.isMediaLoaded {
             self.kavaData.isMediaLoaded = true
-            
             sendAnalyticsEvent(event: KavaEventType.impression)
         }
     }

@@ -14,29 +14,33 @@ import PlayKit
 import KalturaNetKit
 
 class KavaHelper {
-    static func get(config: KavaPluginConfig,
-                    eventType: KavaPlugin.KavaEventType.RawValue,
-                    eventIndex: Int,
-                    kavaData: KavaPluginData,
-                    player: Player) -> KalturaRequestBuilder? {
+    
+    static func builder(config: KavaPluginConfig,
+                        eventType: KavaPlugin.KavaEventType.RawValue,
+                        eventIndex: Int,
+                        kavaData: KavaPluginData,
+                        player: Player) -> KalturaRequestBuilder? {
         
         if let request: KalturaRequestBuilder = KalturaRequestBuilder(url: config.baseUrl, service: nil, action: nil) {
-            
-            addMediaParams(config: config,
-                           request: request)
             
             request
                 .setParam(key: "eventType", value: String(eventType))
                 .setParam(key: "eventIndex", value: String(eventIndex))
                 .setParam(key: "deliveryType", value: kavaData.deliveryType)
             
+            addMediaParams(config: config,
+                           player: player,
+                           request: request)
+            
             addMediaTypeParam(config: config,
                               kavaData: kavaData,
                               request: request,
                               player: player)
+            
             addDynamicParams(eventType: eventType,
                              kavaData: kavaData,
                              request: request)
+            
             addOptionalParams(config: config,
                               request: request)
             
@@ -58,6 +62,7 @@ class KavaHelper {
     
     /// Adds media params that won't be changed until media is updated.
     static private func addMediaParams(config: KavaPluginConfig,
+                                       player: Player,
                                        request: KalturaRequestBuilder) {
         request.setParam(key: "service", value: "analytics")
         request.setParam(key: "action", value: "trackEvent")
@@ -67,13 +72,10 @@ class KavaHelper {
         request.setParam(key: "referrer", value: config.referrer!)
         request.setParam(key: "clientVer", value: "\(PlayKitManager.clientTag)")
         request.setParam(key: "clientTag", value: "\(PlayKitManager.clientTag)")
+        request.setParam(key: "sessionId", value: player.sessionId)
         
-        if let entryId = config.entryId {
+        if let entryId = player.mediaEntry?.id {
             request.setParam(key: "entryId", value: entryId)
-        }
-        
-        if let sessionId = config.sessionId {
-            request.setParam(key: "sessionId", value: sessionId)
         }
         
         if let sessionStartTime = config.sessionStartTime {
@@ -91,12 +93,20 @@ class KavaHelper {
         }
         
         switch eventType {
-        case KavaPlugin.KavaEventType.view.rawValue,
-             KavaPlugin.KavaEventType.play.rawValue,
-             KavaPlugin.KavaEventType.resume.rawValue:
+        case KavaPlugin.KavaEventType.view.rawValue, KavaPlugin.KavaEventType.play.rawValue, KavaPlugin.KavaEventType.resume.rawValue:
             request.setParam(key: "bufferTime", value: String(kavaData.totalBufferingInCurrentInterval))
             request.setParam(key: "bufferTimeSum", value: String(kavaData.totalBuffering))
             request.setParam(key: "actualBitrate", value: String(describing: kavaData.indicatedBitrate))
+            // view event has more data to be set
+            if eventType == KavaPlugin.KavaEventType.view.rawValue {
+                request.setParam(key: "averageBitrate", value: String(kavaData.bitrateSum / Double(kavaData.bitrateCount)))
+                request.setParam(key: "playTimeSum", value: String(kavaData.totalPlayTime))
+            }
+            if eventType == KavaPlugin.KavaEventType.play.rawValue {
+                if let joinTime = kavaData.joinTime {
+                    request.setParam(key: "joinTime", value: String(joinTime))
+                }
+            }
         case KavaPlugin.KavaEventType.seek.rawValue:
             request.setParam(key: "targetPosition", value: String(kavaData.targetSeekPosition))
         case KavaPlugin.KavaEventType.captions.rawValue:
@@ -107,6 +117,8 @@ class KavaHelper {
             if (kavaData.errorCode != -1) {
                 request.setParam(key: "errorCode", value: String(kavaData.errorCode))
             }
+        case KavaPlugin.KavaEventType.flavorSwitched.rawValue:
+            request.setParam(key: "actualBitrate", value: String(describing: kavaData.indicatedBitrate))
         default:
             PKLog.debug("KavaEventType accured: \(eventType)")
         }

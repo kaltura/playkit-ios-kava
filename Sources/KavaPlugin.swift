@@ -10,6 +10,7 @@
 
 import PlayKit
 import KalturaNetKit
+import SwiftyJSON
 
 /************************************************************/
 // MARK: - Playback Points Array
@@ -65,6 +66,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
     var viewTimer: Timer?
     var bufferingStartTime: Date?
     var kavaData = KavaPluginData()
+    var isViewEventsEnabled = true
     /// A sequence number which describe the order of events in a viewing session.
     private var eventIndex = 1
     
@@ -164,9 +166,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
     
     @objc func reportView() {
         // If timer is nil, no reason to report.
-        if self.viewTimer == nil {
-            return
-        }
+        guard self.viewTimer != nil, isViewEventsEnabled else { return }
         
         if let _ = bufferingStartTime {
             self.kavaData.totalBufferingInCurrentInterval += -bufferingStartTime!.timeIntervalSinceNow
@@ -235,8 +235,14 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
         builder.set { (response: Response) in
             PKLog.debug("Response: \(String(describing: response))")
             
+            guard let data = response.data, let responseJson = JSON(data).dictionary else { return }
+            
             if (self.config.sessionStartTime == nil) {
-                self.config.sessionStartTime = response.data as? String
+                self.config.sessionStartTime = responseJson["time"]?.string
+            }
+            
+            if let viewEventsEnabled = responseJson["viewEventsEnabled"]?.bool {
+                self.isViewEventsEnabled = viewEventsEnabled
             }
         }
         

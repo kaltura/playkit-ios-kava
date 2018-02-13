@@ -160,6 +160,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
     }
     
     func stopViewTimer() {
+        self.config.sessionStartTime = nil
         viewTimer?.invalidate()
         viewTimer = nil
     }
@@ -250,9 +251,9 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
         self.eventIndex+=1
     }
     
-    /************************************************************/
+    /* ***********************************************************/
     // MARK: - Private Functions
-    /************************************************************/
+    /* ***********************************************************/
     
     /// On media changed config internal params are set.
     private func setMediaConfigParams() {
@@ -267,9 +268,24 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
     }
 }
 
-/************************************************************/
+/* ***********************************************************/
+// MARK: - AppStateObserver
+/* ***********************************************************/
+
+extension KavaPlugin: AppStateObservable {
+    
+    public var observations: Set<NotificationObservation> {
+        return [
+            NotificationObservation(name: .UIApplicationDidEnterBackground, onObserve: { [weak self] in
+                self?.stopViewTimer()
+            })
+        ]
+    }
+}
+
+/* ***********************************************************/
 // MARK: - Extensions
-/************************************************************/
+/* ***********************************************************/
 
 extension PKEvent {
     /// Report Value, PKEvent Data Accessor

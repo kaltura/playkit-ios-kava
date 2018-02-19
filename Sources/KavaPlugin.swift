@@ -74,7 +74,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
     /************************************************************/
     
     public override class var pluginName: String {
-        return "KavaPlugin"
+        return "kava"
     }
     
     public required init(player: Player, pluginConfig: Any?, messageBus: MessageBus, tokenReplacer: TokenReplacer?) throws {

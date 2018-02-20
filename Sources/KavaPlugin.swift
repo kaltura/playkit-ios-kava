@@ -96,6 +96,26 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
         self.registerEvents()
     }
     
+    public static func merge(uiConf: Any, appConf: Any) -> Any? {
+        var uiConfig: KavaPluginConfig?
+        if uiConf is JSON {
+            uiConfig = KavaPluginConfig.parse(json: uiConf as! JSON)
+        } else {
+            uiConfig = uiConf as? KavaPluginConfig
+        }
+        guard uiConfig != nil else { return appConf }
+        
+        var appConfig: KavaPluginConfig?
+        if appConf is JSON {
+            appConfig = KavaPluginConfig.parse(json: appConf as! JSON)
+        } else {
+            appConfig = appConf as? KavaPluginConfig
+        }
+        guard appConfig != nil else { return uiConfig }
+        
+        return uiConfig?.merge(config: appConfig!)
+    }
+    
     public override func onUpdateMedia(mediaConfig: MediaConfig) {
         PKLog.debug("onUpdateMedia: \(String(describing: mediaConfig))")
         super.onUpdateMedia(mediaConfig: mediaConfig)

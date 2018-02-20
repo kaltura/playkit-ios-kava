@@ -134,6 +134,32 @@ import SwiftyJSON
         return config
     }
     
+    public func merge(config: KavaPluginConfig) -> KavaPluginConfig {
+        if config.baseUrl != defaultBaseUrl {
+            baseUrl = config.baseUrl
+        }
+        if config.uiconfId != -1 {
+            uiconfId = config.uiconfId
+        }
+        if let context = config.playbackContext {
+            playbackContext = context
+        }
+        if let referrer = config.referrer {
+            self.referrer = referrer
+        }
+        if let var1 = config.customVar1 {
+            customVar1 = var1
+        }
+        if let var2 = config.customVar2 {
+            customVar2 = var2
+        }
+        if let var3 = config.customVar3 {
+            customVar3 = var3
+        }
+
+        return self
+    }
+    
     /************************************************************/
     // MARK: Private Implementation
     /************************************************************/

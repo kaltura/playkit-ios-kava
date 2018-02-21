@@ -24,7 +24,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
 /************************************************************/
 
 /// This class represents Kaltura real time analytics for live and on-demand video.
-@objc public class KavaPlugin: BasePlugin {
+@objc public class KavaPlugin: BasePlugin, PKPluginMerge {
     
     /// Kava event types
     enum KavaEventType : Int {
@@ -96,24 +96,12 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
         self.registerEvents()
     }
     
-    public static func merge(uiConf: Any, appConf: Any) -> Any? {
-        var uiConfig: KavaPluginConfig?
-        if uiConf is JSON {
-            uiConfig = KavaPluginConfig.parse(json: uiConf as! JSON)
-        } else {
-            uiConfig = uiConf as? KavaPluginConfig
-        }
-        guard uiConfig != nil else { return appConf }
-        
-        var appConfig: KavaPluginConfig?
-        if appConf is JSON {
-            appConfig = KavaPluginConfig.parse(json: appConf as! JSON)
-        } else {
-            appConfig = appConf as? KavaPluginConfig
-        }
-        guard appConfig != nil else { return uiConfig }
-        
-        return uiConfig?.merge(config: appConfig!)
+    public static func parse(json: Any) -> PKPluginConfigMerge? {
+        return KavaPluginConfig.parse(json: json as! JSON)
+    }
+    
+    public static func cast(uiConf: Any) -> PKPluginConfigMerge? {
+        return uiConf as? KavaPluginConfig
     }
     
     public override func onUpdateMedia(mediaConfig: MediaConfig) {

@@ -42,7 +42,7 @@ extension KavaPlugin: AnalyticsPluginProtocol {
         ]
     }
     
- public func registerEvents() {
+    public func registerEvents() {
         self.messageBus?.addObserver(self, events: playerEventsToRegister, block: { [weak self] event in
             guard let strongSelf = self else { return }
             

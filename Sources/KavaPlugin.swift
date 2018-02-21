@@ -10,6 +10,7 @@
 
 import PlayKit
 import KalturaNetKit
+import SwiftyJSON
 
 /************************************************************/
 // MARK: - Playback Points Array
@@ -74,6 +75,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
     var lastViewTime: TimeInterval = 0
     var indicatedBitrate: Double = 0
     var joinTimeStart: TimeInterval = 0
+    var isViewEventsEnabled = true
     /// A sequence number which describe the order of events in a viewing session.
     private var eventIndex = 1
     
@@ -167,12 +169,16 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
     }
     
     func stopViewTimer() {
+        self.config.sessionStartTime = nil
         viewTimer?.invalidate()
         viewTimer = nil
     }
     
     @objc func timerTick() {
         self.currentViewTime += self.timerInterval
+        // handle bitrate
+        self.kavaData.bitrateCount += 1
+        self.kavaData.bitrateSum += self.indicatedBitrate
         // report view when view interval is reached
         if self.currentViewTime >= self.viewInterval {
             self.currentViewTime -= self.viewInterval
@@ -182,9 +188,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
     
     func reportView() {
         // If timer is nil, no reason to report.
-        if self.viewTimer == nil {
-            return
-        }
+        guard self.viewTimer != nil, isViewEventsEnabled else { return }
         
         if let _ = bufferingStartTime {
             self.kavaData.totalBufferingInCurrentInterval += -bufferingStartTime!.timeIntervalSinceNow
@@ -261,10 +265,6 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
             mediaCurrentTime = player.currentTime
         }
         self.kavaData.mediaCurrentTime = mediaCurrentTime
-        
-        // handle bitrate
-        self.kavaData.bitrateCount += 1
-        self.kavaData.bitrateSum += self.indicatedBitrate
       
         guard let builder: KalturaRequestBuilder = KavaHelper.builder(config: self.config,
                                                                       eventType: event.rawValue,
@@ -279,8 +279,14 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
         builder.set { (response: Response) in
             PKLog.debug("Response: \(String(describing: response))")
             
+            guard let data = response.data, let responseJson = JSON(data).dictionary else { return }
+            
             if (self.config.sessionStartTime == nil) {
-                self.config.sessionStartTime = response.data as? String
+                self.config.sessionStartTime = responseJson["time"]?.string
+            }
+            
+            if let viewEventsEnabled = responseJson["viewEventsEnabled"]?.bool {
+                self.isViewEventsEnabled = viewEventsEnabled
             }
         }
         
@@ -290,9 +296,9 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
         self.kavaData.totalBufferingInCurrentInterval = TimeInterval()
     }
     
-    /************************************************************/
+    /* ***********************************************************/
     // MARK: - Private Functions
-    /************************************************************/
+    /* ***********************************************************/
     
     /// On media changed config internal params are set.
     private func setMediaConfigParams() {
@@ -304,9 +310,24 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
     }
 }
 
-/************************************************************/
+/* ***********************************************************/
+// MARK: - AppStateObserver
+/* ***********************************************************/
+
+extension KavaPlugin: AppStateObservable {
+    
+    public var observations: Set<NotificationObservation> {
+        return [
+            NotificationObservation(name: .UIApplicationDidEnterBackground, onObserve: { [weak self] in
+                self?.stopViewTimer()
+            })
+        ]
+    }
+}
+
+/* ***********************************************************/
 // MARK: - Extensions
-/************************************************************/
+/* ***********************************************************/
 
 extension PKEvent {
     /// Report Value, PKEvent Data Accessor

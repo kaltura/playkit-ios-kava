@@ -1,8 +1,8 @@
 use_frameworks!
 
 target 'PlayKitFramework' do
-  pod 'PlayKit/Core', :git => 'https://github.com/kaltura/playkit-ios.git', :branch => 'FEM-1745'
-  pod 'PlayKit/AnalyticsCommon', :git => 'https://github.com/kaltura/playkit-ios.git', :branch => 'FEM-1745'
+  pod 'PlayKit/Core'
+  pod 'PlayKit/AnalyticsCommon'
   pod 'PlayKitKava', :path => '../'
 end
 

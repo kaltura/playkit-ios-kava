@@ -60,10 +60,7 @@ import SwiftyJSON
     // MARK: Internal Properties
     /************************************************************/
     
-    var entryId: String?
-    var sessionId: String?
     var sessionStartTime: String?
-    var mediaFormat: PKMediaSource.MediaFormat?
     var isLive: Bool?
     var hasDVR: Bool?
     

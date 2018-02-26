@@ -26,6 +26,8 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
 /// This class represents Kaltura real time analytics for live and on-demand video.
 @objc public class KavaPlugin: BasePlugin {
     
+    private static let userAgent = "\(Bundle.main.bundleIdentifier ?? "") \(PlayKitManager.clientTag) \(UIWebView().stringByEvaluatingJavaScript(from: "navigator.userAgent") ?? "")"
+    
     let viewInterval: TimeInterval = 10
     let timerInterval: TimeInterval = 1
     
@@ -92,7 +94,6 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
             PKLog.error("missing plugin config or wrong plugin class type")
             throw PKPluginError.missingPluginConfig(pluginName: KavaPlugin.pluginName)
         }
-        
         self.config = config
         try super.init(player: player, pluginConfig: self.config, messageBus: messageBus)
         self.registerEvents()
@@ -275,7 +276,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
                 PKLog.warning("KalturaRequestBuilder is nil")
                 return
         }
-        
+        builder.add(headerKey: "userAgent", headerValue: KavaPlugin.userAgent)
         builder.set { (response: Response) in
             PKLog.debug("Response: \(String(describing: response))")
             
@@ -289,7 +290,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
                 self.isViewEventsEnabled = viewEventsEnabled
             }
         }
-        
+        print("Send Kava Event: \(builder.urlParams!)")
         USRExecutor.shared.send(request: builder.build())
         
         self.eventIndex += 1

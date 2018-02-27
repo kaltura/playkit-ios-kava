@@ -37,6 +37,7 @@ extension KavaPlugin: AnalyticsPluginProtocol {
             PlayerEvent.sourceSelected,
             PlayerEvent.ended,
             PlayerEvent.textTrackChanged,
+            PlayerEvent.audioTrackChanged,
             PlayerEvent.videoTrackChanged,
             PlayerEvent.error
         ]
@@ -63,9 +64,11 @@ extension KavaPlugin: AnalyticsPluginProtocol {
             } else if type(of: event) == PlayerEvent.ended {
                 strongSelf.handleEnded()
             } else if type(of: event) == PlayerEvent.videoTrackChanged {
-                strongSelf.handleVideoTrackChanged(videoTrack: event.bitrate)
+                strongSelf.handleVideoTrackChanged(event.bitrate)
+            } else if type(of: event) == PlayerEvent.audioTrackChanged {
+                strongSelf.handleAudioTrackChanged(event.selectedTrack)
             } else if type(of: event) == PlayerEvent.textTrackChanged {
-                strongSelf.handleTextTrackChanged(textTrack: event.selectedTrack)
+                strongSelf.handleTextTrackChanged(event.selectedTrack)
             } else if type(of: event) == PlayerEvent.error {
                 strongSelf.handleError(error: event.error)
             } else {
@@ -174,16 +177,27 @@ extension KavaPlugin: AnalyticsPluginProtocol {
         self.stopViewTimer()
     }
     
-    private func handleVideoTrackChanged(videoTrack: NSNumber?) {
+    private func handleVideoTrackChanged(_ videoTrack: NSNumber?) {
         PKLog.debug("videoTrackChanged event")
         
         if let bitrate = videoTrack {
-            self.indicatedBitrate = bitrate.doubleValue
+            self.kavaData.indicatedBitrate = bitrate.doubleValue
             self.sendAnalyticsEvent(event: KavaEventType.flavorSwitched)
         }
     }
     
-    private func handleTextTrackChanged(textTrack: Track?) {
+    private func handleAudioTrackChanged(_ audioTrack: Track?) {
+        PKLog.debug("audioTrackChanged event")
+        
+        if let track = audioTrack {
+            if (track.language != nil) {
+                self.kavaData.currentAudioLanguage = track.language
+                self.sendAnalyticsEvent(event: KavaEventType.audioSelected)
+            }
+        }
+    }
+    
+    private func handleTextTrackChanged(_ textTrack: Track?) {
         PKLog.debug("textTrackChanged event")
         
         if let track = textTrack {

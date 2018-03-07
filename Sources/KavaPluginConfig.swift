@@ -107,7 +107,7 @@ import SwiftyJSON
     public static func parse(json: JSON) -> KavaPluginConfig? {
         guard let jsonDictionary = json.dictionary else { return nil }
         
-        guard let partnerId = jsonDictionary["partnerId"]?.int else { return nil }
+        let partnerId = jsonDictionary["partnerId"]?.int ?? -1
         
         let config = KavaPluginConfig(partnerId: partnerId, ks: nil, playbackContext: nil, referrer: nil, applicationVersion: nil, playlistId: nil, customVar1: nil, customVar2: nil, customVar3: nil)
         
@@ -144,6 +144,9 @@ import SwiftyJSON
     
     public func merge(config: PKPluginConfigMerge) -> PKPluginConfigMerge {
         if let config = config as? KavaPluginConfig {
+            if config.partnerId != -1 {
+                partnerId = config.partnerId
+            }
             if config.baseUrl != defaultBaseUrl {
                 baseUrl = config.baseUrl
             }

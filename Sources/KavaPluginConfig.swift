@@ -109,7 +109,7 @@ import SwiftyJSON
         
         guard let partnerId = jsonDictionary["partnerId"]?.int else { return nil }
         
-        let config = KavaPluginConfig(partnerId: partnerId, ks: nil, playbackContext: nil, referrer: nil, customVar1: nil, customVar2: nil, customVar3: nil)
+        let config = KavaPluginConfig(partnerId: partnerId, ks: nil, playbackContext: nil, referrer: nil, applicationVersion: nil, playlistId: nil, customVar1: nil, customVar2: nil, customVar3: nil)
         
         if let baseUrl = jsonDictionary["baseUrl"]?.string, baseUrl != "" {
             config.baseUrl = baseUrl
@@ -122,6 +122,12 @@ import SwiftyJSON
         }
         if let referrer = jsonDictionary["referrer"]?.string {
             config.referrer = referrer
+        }
+        if let applicationVersion = jsonDictionary["applicationVersion"]?.string {
+            config.applicationVersion = applicationVersion
+        }
+        if let playlistId = jsonDictionary["playlistId"]?.string {
+            config.playlistId = playlistId
         }
         if let customVar1 = jsonDictionary["customVar1"]?.string {
             config.customVar1 = customVar1
@@ -149,6 +155,12 @@ import SwiftyJSON
             }
             if let referrer = config.referrer {
                 self.referrer = referrer
+            }
+            if let appVersion = config.applicationVersion {
+                applicationVersion = appVersion
+            }
+            if let _playlistId = config.playlistId {
+                playlistId = _playlistId
             }
             if let var1 = config.customVar1 {
                 customVar1 = var1

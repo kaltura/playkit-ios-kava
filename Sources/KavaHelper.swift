@@ -71,7 +71,9 @@ class KavaHelper {
         // on init func referrer gets value.
         request.setParam(key: "referrer", value: config.referrer!)
         request.setParam(key: "clientVer", value: "\(PlayKitManager.clientTag)")
-        request.setParam(key: "clientTag", value: "\(PlayKitManager.clientTag)")
+        if let bundleId = Bundle.main.bundleIdentifier {
+            request.setParam(key: "application", value: "\(bundleId)")
+        }
         request.setParam(key: "sessionId", value: player.sessionId)
         
         if let entryId = player.mediaEntry?.id {
@@ -112,6 +114,10 @@ class KavaHelper {
         case KavaPlugin.KavaEventType.captions.rawValue:
             if let caption = kavaData.currentCaptionLanguage {
                 request.setParam(key: "caption", value: caption)
+            }
+        case KavaPlugin.KavaEventType.audioSelected.rawValue:
+            if let audioLanguage = kavaData.currentAudioLanguage {
+                request.setParam(key: "language", value: audioLanguage)
             }
         case KavaPlugin.KavaEventType.error.rawValue:
             if (kavaData.errorCode != -1) {
@@ -197,6 +203,14 @@ class KavaHelper {
         
         if config.uiconfId != -1 {
             request.setParam(key: "uiConfId", value: String(config.uiconfId))
+        }
+        
+        if let applicationVersion = config.applicationVersion {
+            request.setParam(key: "applicationVer", value: applicationVersion)
+        }
+        
+        if let playlistId = config.playlistId {
+            request.setParam(key: "playlistId", value: playlistId)
         }
     }
 }

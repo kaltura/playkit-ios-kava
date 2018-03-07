@@ -26,6 +26,8 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
 /// This class represents Kaltura real time analytics for live and on-demand video.
 @objc public class KavaPlugin: BasePlugin, PKPluginMerge {
     
+    private static let userAgent = "\(Bundle.main.bundleIdentifier ?? "") \(PlayKitManager.clientTag) \(UIWebView().stringByEvaluatingJavaScript(from: "navigator.userAgent") ?? "")"
+    
     let viewInterval: TimeInterval = 10
     let timerInterval: TimeInterval = 1
     
@@ -57,6 +59,8 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
         case captions = 38
         /// Source Selected (media was changed) event was triggred
         case sourceSelected = 39
+        /// Sent when audio track changed
+        case audioSelected = 42
         /// The video track has changed to a different bitrate (indicated bitrate).
         case flavorSwitched = 43
         /// Error event was triggred
@@ -73,7 +77,6 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
     var kavaData = KavaPluginData()
     var currentViewTime: TimeInterval = 0
     var lastViewTime: TimeInterval = 0
-    var indicatedBitrate: Double = 0
     var joinTimeStart: TimeInterval = 0
     var isViewEventsEnabled = true
     /// A sequence number which describe the order of events in a viewing session.
@@ -100,7 +103,6 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
             PKLog.error("missing plugin config or wrong plugin class type")
             throw PKPluginError.missingPluginConfig(pluginName: KavaPlugin.pluginName).asNSError
         }
-        
         self.config = config
         try super.init(player: player, pluginConfig: pluginConfig, messageBus: messageBus, tokenReplacer: tokenReplacer)
         self.registerEvents()
@@ -194,7 +196,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
         self.currentViewTime += self.timerInterval
         // handle bitrate
         self.kavaData.bitrateCount += 1
-        self.kavaData.bitrateSum += self.indicatedBitrate
+        self.kavaData.bitrateSum += kavaData.indicatedBitrate
         // report view when view interval is reached
         if self.currentViewTime >= self.viewInterval {
             self.currentViewTime -= self.viewInterval
@@ -226,7 +228,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
         self.kavaData.totalBuffering = 0
         self.kavaData.totalBufferingInCurrentInterval = 0
         self.eventIndex = 1
-        self.indicatedBitrate = 0
+        self.kavaData.indicatedBitrate = 0
     }
     
     func sendPercentageReachedEvent(percentage: Int) {
@@ -291,7 +293,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
                 PKLog.warning("KalturaRequestBuilder is nil")
                 return
         }
-        
+        builder.add(headerKey: "userAgent", headerValue: KavaPlugin.userAgent)
         builder.set { (response: Response) in
             PKLog.debug("Response: \(String(describing: response))")
             
@@ -305,7 +307,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
                 self.isViewEventsEnabled = viewEventsEnabled
             }
         }
-        
+        print("Send Kava Event: \(builder.urlParams!)")
         USRExecutor.shared.send(request: builder.build())
         
         self.eventIndex += 1

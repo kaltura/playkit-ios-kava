@@ -53,6 +53,8 @@ class KavaPluginData {
     var errorCode: Int = -1
     /// Language of the selected caption.
     var currentCaptionLanguage: String?
+    /// Language of the selected audio track.
+    var currentAudioLanguage: String?
     /// indicates whether we played for the first time or not.
     public var isFirstPlay: Bool = true
     /// indicates whether playback is paused.

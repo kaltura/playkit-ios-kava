@@ -54,6 +54,10 @@ import PlayKit
     @objc public var playbackType: PlaybackType = .unknown  
     /// DVR Threshold set by default to 2 minutes.
     @objc public var dvrThreshold = 120
+    /// The application version.
+    @objc public var applicationVersion: String?
+    /// The playlist Id.
+    @objc public var playlistId: String?
     
     /************************************************************/
     // MARK: Internal Properties
@@ -67,8 +71,7 @@ import PlayKit
     // MARK: - Initialization
     /************************************************************/
     
-    @objc public init(partnerId: Int, ks: String?, playbackContext: String?,
-                      referrer: String?, customVar1: String?, customVar2: String?, customVar3: String?) {
+    @objc public init(partnerId: Int, ks: String?, playbackContext: String?, referrer: String?, applicationVersion: String?, playlistId: String?, customVar1: String?, customVar2: String?, customVar3: String?) {
         self.baseUrl = defaultBaseUrl
         // uiconfId is optional, set to -1 as default
         // can be overridden
@@ -76,6 +79,8 @@ import PlayKit
         self.partnerId = partnerId
         self.ks = ks
         self.playbackContext = playbackContext
+        self.applicationVersion = applicationVersion
+        self.playlistId = playlistId
         self.customVar1 = customVar1
         self.customVar2 = customVar2
         self.customVar3 = customVar3

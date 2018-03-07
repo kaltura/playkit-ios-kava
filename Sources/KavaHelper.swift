@@ -204,5 +204,13 @@ class KavaHelper {
         if config.uiconfId != -1 {
             request.setParam(key: "uiConfId", value: String(config.uiconfId))
         }
+        
+        if let applicationVersion = config.applicationVersion {
+            request.setParam(key: "applicationVer", value: applicationVersion)
+        }
+        
+        if let playlistId = config.playlistId {
+            request.setParam(key: "playlistId", value: playlistId)
+        }
     }
 }

@@ -277,7 +277,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
                 PKLog.warning("KalturaRequestBuilder is nil")
                 return
         }
-        builder.add(headerKey: "userAgent", headerValue: KavaPlugin.userAgent)
+        builder.add(headerKey: "User-Agent", headerValue: KavaPlugin.userAgent)
         builder.set { (response: Response) in
             PKLog.debug("Response: \(String(describing: response))")
             

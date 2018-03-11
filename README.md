@@ -1,4 +1,4 @@
-# playkit-ios-kava
+# PlayKit Kava Plugin
 
 This project is the new client analytics project of Kaltura.
 
@@ -6,9 +6,27 @@ With Kava project, Kaltura real time analytics for live and on-demand video, you
 
 With the clear numbers in hand, Kaltura’s partner can build a content and monetization strategy that really works.
 
-## Documentation  
+## Example
 
-Please see our [documentation](https://kaltura.github.io/playkit-ios-kava/) for usage and information.
+To run a Kaltura Kava smaple use:
+https://github.com/kaltura/playkit-ios-samples/tree/develop/KavaPluginSample
+
+## Intro & Documantation
+
+PlayKit Kava Plugin is available through [CocoaPods](http://cocoapods.org). To install
+it, simply add the following line to your Podfile:
+
+```ruby
+pod "PlayKitKava"
+```
+For full documantation about **Kava Plugin** use:
+https://github.com/kaltura/playkit-ios-kava/blob/develop/docs/index.md
+
+## Requirements
+
+* XCode9 or newer
+* iOS 9.0+
+* CocoaPods
 
 ## License and Copyright Information  
 

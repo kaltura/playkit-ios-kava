@@ -6,21 +6,14 @@ With Kava project, Kaltura real time analytics for live and on-demand video, you
 
 With the clear numbers in hand, Kaltura’s partner can build a content and monetization strategy that really works.
 
-## Example
-
-To run a Kaltura Kava smaple use:
-https://github.com/kaltura/playkit-ios-samples/tree/develop/KavaPluginSample
-
 ## Intro & Documantation
 
-PlayKit Kava Plugin is available through [CocoaPods](http://cocoapods.org). To install
-it, simply add the following line to your Podfile:
+PlayKit Kava Plugin is available through [CocoaPods](https://cocoapods.org/?q=PlayKitKava). To install it, simply add the following line to your Podfile:
 
-```ruby
+```
 pod "PlayKitKava"
 ```
-For full documantation about **Kava Plugin** use:
-https://github.com/kaltura/playkit-ios-kava/blob/develop/docs/index.md
+Full documantation about **Kava Plugin** can be found [here](https://kaltura.github.io/playkit-ios-kava/).
 
 ## Requirements
 
@@ -28,9 +21,14 @@ https://github.com/kaltura/playkit-ios-kava/blob/develop/docs/index.md
 * iOS 9.0+
 * CocoaPods
 
+## Example
+
+A Kaltura Kava sample can be seen [here](https://github.com/kaltura/playkit-ios-samples/tree/develop/KavaPluginSample).
+
+
 ## License and Copyright Information  
 
 All code in this project is released under the [AGPLv3 license](http://www.gnu.org/licenses/agpl-3.0.html) unless a different license for a particular library is specified in the applicable library path.   
 
 Copyright © Kaltura Inc. All rights reserved.   
-Authors and contributors: See [GitHub contributors list](https://github.com/kaltura/playkit-ios-vr/graphs/contributors).
+Authors and contributors: See [GitHub contributors list](https://github.com/kaltura/playkit-ios-kava/graphs/contributors).

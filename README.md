@@ -25,7 +25,6 @@ Full documantation about **Kava Plugin** can be found [here](https://kaltura.git
 
 A Kaltura Kava sample can be seen [here](https://github.com/kaltura/playkit-ios-samples/tree/develop/KavaPluginSample).
 
-
 ## License and Copyright Information  
 
 All code in this project is released under the [AGPLv3 license](http://www.gnu.org/licenses/agpl-3.0.html) unless a different license for a particular library is specified in the applicable library path.   

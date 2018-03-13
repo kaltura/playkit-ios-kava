@@ -12,7 +12,6 @@ Pod::Spec.new do |s|
     s.swift_version           = '4.0'
     s.dependency 'PlayKit/Core'
     s.dependency 'PlayKit/AnalyticsCommon'
-
 end
 
 # To add playkit kava as dependecy use: s.dependency 'PlayKitKava', 'version_number'

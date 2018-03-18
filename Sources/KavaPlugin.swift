@@ -159,7 +159,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
             // see if is live via provider
             if player.isLive() {
                 return
-            // see if live via config
+                // see if live via config
             } else if let isLive = config.isLive, isLive == true {
                 return
             }
@@ -232,13 +232,13 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
     func sendAnalyticsEvent(event: KavaEventType) {
         guard let player = self.player else {
             PKLog.warning("Player/ MediaEntry is nil")
-            return    
+            return
         }
         
         PKLog.debug("Action: \(event)")
         
         // send event to messageBus
-        let eventType = KavaEvent.Report(message: "send event with action type: \(event.rawValue)")
+        let eventType = KavaEvent.Report(message: "Kava event: \(event) (\(event.rawValue))")
         self.messageBus?.post(eventType)
         
         let currentTime = Date().timeIntervalSince1970
@@ -267,7 +267,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
             mediaCurrentTime = player.currentTime
         }
         self.kavaData.mediaCurrentTime = mediaCurrentTime
-      
+        
         guard let builder: KalturaRequestBuilder = KavaHelper.builder(config: self.config,
                                                                       eventType: event.rawValue,
                                                                       eventIndex: self.eventIndex,
@@ -304,7 +304,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
     
     /// On media changed config internal params are set.
     private func setMediaConfigParams() {
-    
+        
         // If media is vod, set isLive param only once.
         if let player = self.player, !player.isLive() {
             self.config.isLive = player.isLive()

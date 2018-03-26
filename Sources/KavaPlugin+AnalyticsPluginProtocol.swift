@@ -200,10 +200,17 @@ extension KavaPlugin: AnalyticsPluginProtocol {
     private func handleTextTrackChanged(_ textTrack: Track?) {
         PKLog.debug("textTrackChanged event")
         
+        let textOffDisplay: String = "Off"
+        
         if let track = textTrack {
             if (track.language != nil) {
                 self.kavaData.currentCaptionLanguage = track.language
                 self.sendAnalyticsEvent(event: KavaEventType.captions)
+            } else {
+                if (track.title == textOffDisplay) {
+                    self.kavaData.currentCaptionLanguage = "none"
+                    self.sendAnalyticsEvent(event: KavaEventType.captions)
+                }
             }
         }
     }

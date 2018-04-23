@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
     
     s.name                    = 'PlayKitKava'
-    s.version                 = '1.0.4'
+    s.version                 = '1.0.3'
     s.summary                 = 'PlayKitKava -- Analytics framework for iOS'
     s.homepage                = 'https://github.com/kaltura/playkit-ios-kava'
     s.license                 = { :type => 'AGPLv3', :file => 'LICENSE' }

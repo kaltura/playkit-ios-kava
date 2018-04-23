@@ -26,7 +26,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
 /// This class represents Kaltura real time analytics for live and on-demand video.
 @objc public class KavaPlugin: BasePlugin {
     
-    private static let userAgent = "\(Bundle.main.bundleIdentifier ?? "") \(PlayKitManager.clientTag) \(UIWebView().stringByEvaluatingJavaScript(from: "navigator.userAgent") ?? "")"
+    private static let userAgent = "\(Bundle.main.bundleIdentifier ?? "") \(PlayKitManager.clientTag) (\(UIDevice.current.model); CPU OS \(ProcessInfo().operatingSystemVersion.majorVersion)_\(ProcessInfo().operatingSystemVersion.minorVersion)_\(ProcessInfo().operatingSystemVersion.patchVersion) like Mac OS X; \(Locale.current.identifier.lowercased()))"
     
     let viewInterval: TimeInterval = 10
     let timerInterval: TimeInterval = 1

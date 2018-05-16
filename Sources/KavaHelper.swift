@@ -46,7 +46,7 @@ class KavaHelper {
             
             // Response in this case is not in Json format
             // It's set to StringSerializer otherwise respone is errored.
-            request.set(responseSerializer: JSONSerializer())
+            request.set(responseSerializer: KavaSerializer())
             
             return request
         } else {

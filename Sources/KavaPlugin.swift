@@ -284,8 +284,13 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
             guard let data = response.data, let responseJson = JSON(data).dictionary else { return }
             
             if (self.config.sessionStartTime == nil) {
-                guard let sessionStartTime = responseJson["time"]?.number else { return }
-                self.config.sessionStartTime = sessionStartTime.stringValue
+                if let sessionStartTime = responseJson["time"]?.number {
+                    // Response returned in JSON format
+                    self.config.sessionStartTime = sessionStartTime.stringValue
+                } else {
+                    // Response returned in String format
+                    self.config.sessionStartTime = responseJson["time"]?.string
+                }
             }
             
             if let viewEventsEnabled = responseJson["viewEventsEnabled"]?.bool {

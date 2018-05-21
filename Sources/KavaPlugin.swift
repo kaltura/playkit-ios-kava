@@ -281,20 +281,32 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
         builder.set { (response: Response) in
             PKLog.debug("Response: \(String(describing: response))")
             
-            guard let data = response.data, let responseJson = JSON(data).dictionary else { return }
+            guard let data = response.data else { return }
             
-            if (self.config.sessionStartTime == nil) {
-                if let sessionStartTime = responseJson["time"]?.number {
-                    // Response returned in JSON format
-                    self.config.sessionStartTime = sessionStartTime.stringValue
-                } else {
-                    // Response returned in String format
-                    self.config.sessionStartTime = responseJson["time"]?.string
+            if JSONSerialization.isValidJSONObject(data) {
+                // Response returned as JSON
+                guard let responseJson = JSON(data).dictionary else { return }
+                
+                if (self.config.sessionStartTime == nil) {
+                    if let sessionStartTime = responseJson["time"]?.number {
+                        // Response returned in JSON format
+                        self.config.sessionStartTime = sessionStartTime.stringValue
+                    } else {
+                        // Response returned in String format
+                        self.config.sessionStartTime = responseJson["time"]?.string
+                    }
                 }
-            }
-            
-            if let viewEventsEnabled = responseJson["viewEventsEnabled"]?.bool {
-                self.isViewEventsEnabled = viewEventsEnabled
+                
+                if let viewEventsEnabled = responseJson["viewEventsEnabled"]?.bool {
+                    self.isViewEventsEnabled = viewEventsEnabled
+                }
+            } else {
+                // Response returned as String (Old format)
+                if (self.config.sessionStartTime == nil) {
+                    if let sessionStartTime = data as? String {
+                        self.config.sessionStartTime = sessionStartTime
+                    }
+                }
             }
         }
         print("Send Kava Event: \(builder.urlParams!)")

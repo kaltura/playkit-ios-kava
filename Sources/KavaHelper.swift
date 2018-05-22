@@ -44,8 +44,7 @@ class KavaHelper {
             addOptionalParams(config: config,
                               request: request)
             
-            // Response in this case is not in Json format
-            // It's set to StringSerializer otherwise respone is errored.
+            // Response can be Json format or the old String format
             request.set(responseSerializer: KavaSerializer())
             
             return request

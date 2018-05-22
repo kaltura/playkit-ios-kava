@@ -4,47 +4,39 @@ PODS:
   - KalturaNetKit/Core (0.0.17):
     - SwiftyJSON
   - Log (1.0)
-  - PlayKit/AnalyticsCommon (3.2.x-dev):
+  - PlayKit/AnalyticsCommon (3.4.0):
     - PlayKit/Core
-  - PlayKit/Core (3.2.x-dev):
+  - PlayKit/Core (3.4.0):
     - KalturaNetKit (~> 0.0)
     - Log (= 1.0)
-    - PlayKitUtils (= 0.1.3)
+    - PlayKitUtils (= 0.1.4)
     - SwiftyJSON (= 3.1.4)
     - SwiftyXMLParser (= 3.0.3)
-  - PlayKitKava (1.0.0):
+  - PlayKitKava (1.0.4):
     - PlayKit/AnalyticsCommon
     - PlayKit/Core
-  - PlayKitUtils (0.1.3)
+  - PlayKitUtils (0.1.4)
   - SwiftyJSON (3.1.4)
   - SwiftyXMLParser (3.0.3)
 
 DEPENDENCIES:
-  - PlayKit/AnalyticsCommon (from `https://github.com/kaltura/playkit-ios.git`, branch `FEM-1745`)
-  - PlayKit/Core (from `https://github.com/kaltura/playkit-ios.git`, branch `FEM-1745`)
+  - PlayKit/AnalyticsCommon
+  - PlayKit/Core
   - PlayKitKava (from `../`)
 
 EXTERNAL SOURCES:
-  PlayKit:
-    :branch: FEM-1745
-    :git: https://github.com/kaltura/playkit-ios.git
   PlayKitKava:
     :path: ../
-
-CHECKOUT OPTIONS:
-  PlayKit:
-    :commit: 3d2c7504073a731cd79d73d59f8b44f362c17871
-    :git: https://github.com/kaltura/playkit-ios.git
 
 SPEC CHECKSUMS:
   KalturaNetKit: d37b3c6fc08da9935677fc547c59b25abc3574a3
   Log: 5e368c9528db07517d18d2d04ff5fe2b6f5a1e21
-  PlayKit: 7159ce0e7e1c6af3c35bb0044bd0f12e0ddad6f4
-  PlayKitKava: 4b321cf411a4aabdd0ff50433cc408562d487077
-  PlayKitUtils: 2f03579f0f1ffbc872050795105b0e5b7302ad7a
+  PlayKit: 89d6010a58df781281119a319e08e91614fa6cd0
+  PlayKitKava: 6e8361f3cb7184d39c9d4e13ac8e34e78e136494
+  PlayKitUtils: 8f03f72690805e20718be6f913547e0966c835f9
   SwiftyJSON: c2842d878f95482ffceec5709abc3d05680c0220
   SwiftyXMLParser: 9c6cc0310e778266a63d8eba50d9e07925aab0fb
 
-PODFILE CHECKSUM: 3a1045426f189349b36991bf64574f57f30546d6
+PODFILE CHECKSUM: c7e7677fe9197320768092debe60edeb621ab759
 
-COCOAPODS: 1.3.1
+COCOAPODS: 1.4.0

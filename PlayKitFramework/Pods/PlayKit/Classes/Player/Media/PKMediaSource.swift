@@ -8,16 +8,6 @@
 // https://www.gnu.org/licenses/agpl-3.0.html
 // ===================================================================================================
 
-// ===================================================================================================
-// Copyright (C) 2017 Kaltura Inc.
-//
-// Licensed under the AGPLv3 license, unless a different license for a
-// particular library is specified in the applicable library path.
-//
-// You may obtain a copy of the License at
-// https://www.gnu.org/licenses/agpl-3.0.html
-// ===================================================================================================
-
 import Foundation
 import SwiftyJSON
 
@@ -28,7 +18,6 @@ import SwiftyJSON
         case wvm
         case mp4
         case mp3
-        case mov
         case unknown
         
         var fileExtension: String {
@@ -38,19 +27,19 @@ import SwiftyJSON
                 case .wvm: return "wvm"
                 case .mp4: return "mp4"
                 case .mp3: return "mp3"
-                case .mov: return "mov"
                 case .unknown: return ""
                 }
             }
         }
         
-        static func mediaFormat(byfileExtension ext:String) -> MediaFormat{
-            switch ext {
+        static func mediaFormat(byfileExtension ext: String) -> MediaFormat {
+            switch ext.lowercased() {
             case "m3u8": return .hls
             case "wvm": return .wvm
             case "mp4": return .mp4
             case "mp3": return .mp3
-            case "mov": return .mov
+            case "mov": return .mp4
+            case "m4a": return .mp3
             default: return .unknown
             }
         }
@@ -66,7 +55,7 @@ import SwiftyJSON
     @objc public var mimeType: String?
     @objc public var drmData: [DRMParams]?
     @objc public var mediaFormat: MediaFormat = .unknown
-    @objc public var fileExt: String {
+    private var fileExt: String {
         return contentUrl?.pathExtension ?? ""
     }
     
@@ -94,7 +83,7 @@ import SwiftyJSON
         self.id = id
         self.contentUrl = contentUrl
         self.drmData = drmData
-        self.mediaFormat = mediaFormat
+        self.mediaFormat = mediaFormat == .unknown ? MediaFormat.mediaFormat(byfileExtension: contentUrl?.pathExtension ?? "") : mediaFormat
     }
     
     @objc public init(json: Any) {
@@ -103,7 +92,9 @@ import SwiftyJSON
         
         self.id = sj[idKey].string ?? UUID().uuidString
         
-        self.contentUrl = sj[contentUrlKey].url
+        super.init()
+        
+        self.setContentUrl(sj[contentUrlKey].url)
         
         if let drmData = sj[drmDataKey].array {
             self.drmData = drmData.flatMap { DRMParams.fromJSON($0) }
@@ -112,11 +103,13 @@ import SwiftyJSON
         if let st = sj[formatTypeKey].int, let mediaFormat = MediaFormat(rawValue: st) {
             self.mediaFormat = mediaFormat
         }
-        
-        super.init()
     }
     
-    override public var description: String {
+    func setContentUrl(_ url: URL?) {
+        self.contentUrl = url
+    }
+    
+    @objc override public var description: String {
         get {
             return "id : \(self.id), url: \(String(describing: self.contentUrl))"
         }

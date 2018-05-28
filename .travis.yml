@@ -6,13 +6,11 @@ before_install:
 script:
   - cd PlayKitFramework
   - pod update --repo-update
-  - set -o pipefail && xcodebuild -scheme PlayKitFramework -workspace PlayKitFramework.xcworkspace | xcpretty
+  - pod spec lint
 notifications:
   email:
     recipients:
       - noam.tamim@kaltura.com
-      - vadim.kononov@kaltura.com
-      - eliza.sapir@kaltura.com
-      - gal.orlanczyk@kaltura.com
+      - nilit.danan@kaltura.com
     on_success: change
     on_failure: always

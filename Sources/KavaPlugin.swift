@@ -30,6 +30,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
     
     let viewInterval: TimeInterval = 10
     let timerInterval: TimeInterval = 1
+    let maxViewIdleInterval: TimeInterval = 30
     
     /// Kava event types
     enum KavaEventType : Int {
@@ -76,7 +77,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
     var bufferingStartTime: Date?
     var kavaData = KavaPluginData()
     var currentViewTime: TimeInterval = 0
-    var lastViewTime: TimeInterval = 0
+    var lastEventSentTime: TimeInterval = 0
     var joinTimeStart: TimeInterval = 0
     var isViewEventsEnabled = true
     /// A sequence number which describe the order of events in a viewing session.
@@ -237,20 +238,25 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
         
         PKLog.debug("Action: \(event)")
         
-        // send event to messageBus
+        // Send event to messageBus
         let eventType = KavaEvent.Report(message: "Kava event: \(event) (\(event.rawValue))")
         self.messageBus?.post(eventType)
         
         let currentTime = Date().timeIntervalSince1970
-        if currentTime - self.lastViewTime > 30 && self.lastViewTime != 0 {
-            self.eventIndex = 1
-            self.kavaData.totalPlayTime = 0
-            self.kavaData.totalBuffering = 0
-            self.kavaData.bitrateSum = 0
-            self.kavaData.bitrateCount = 0
+        
+        if self.isViewEventsEnabled {
+            if currentTime - self.lastEventSentTime > self.maxViewIdleInterval && self.lastEventSentTime != 0 {
+                self.eventIndex = 1
+                self.kavaData.totalPlayTime = 0
+                self.kavaData.totalBuffering = 0
+                self.kavaData.bitrateSum = 0
+                self.kavaData.bitrateCount = 0
+            }
         }
-        self.lastViewTime = currentTime
-        // update total play time
+        
+        self.lastEventSentTime = currentTime
+        
+        // Update total play time
         if player.currentTime > 0 && event == .view {
             self.kavaData.totalPlayTime += (self.kavaData.playTimeInCurrentInterval > 0 ? self.kavaData.playTimeInCurrentInterval : self.viewInterval)
             self.kavaData.playTimeInCurrentInterval = 0
@@ -258,7 +264,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
         
         self.kavaData.mediaDuration = player.duration
         
-        // handle media current time, for live send position against real time in "-" (minus values)
+        // Handle media current time. For live, send position against real time in "-" (minus values)
         let mediaCurrentTime: TimeInterval
         if player.isLive() {
             let currentTime = player.currentTime - player.duration
@@ -277,6 +283,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
                 PKLog.warning("KalturaRequestBuilder is nil")
                 return
         }
+        
         builder.add(headerKey: "User-Agent", headerValue: KavaPlugin.userAgent)
         builder.set { (response: Response) in
             PKLog.debug("Response: \(String(describing: response))")
@@ -305,6 +312,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
                 }
             }
         }
+        
         print("Send Kava Event: \(builder.urlParams!)")
         USRExecutor.shared.send(request: builder.build())
         
@@ -323,21 +331,6 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
         if let player = self.player, !player.isLive() {
             self.config.isLive = player.isLive()
         }
-    }
-}
-
-/* ***********************************************************/
-// MARK: - AppStateObserver
-/* ***********************************************************/
-
-extension KavaPlugin: AppStateObservable {
-    
-    public var observations: Set<NotificationObservation> {
-        return [
-            NotificationObservation(name: .UIApplicationDidEnterBackground, onObserve: { [weak self] in
-                self?.stopViewTimer()
-            })
-        ]
     }
 }
 

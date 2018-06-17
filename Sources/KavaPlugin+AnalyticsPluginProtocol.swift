@@ -173,7 +173,6 @@ extension KavaPlugin: AnalyticsPluginProtocol {
     private func handleEnded() {
         PKLog.debug("ended event")
         self.sendPercentageReachedEvent(percentage: 100)
-        self.reportView()
         self.stopViewTimer()
     }
     

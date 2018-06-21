@@ -37,6 +37,8 @@ import PlayKit
     let applicationId = Bundle.main.bundleIdentifier
     /// The partner account ID on Kaltura's platform.
     @objc public var partnerId: Int
+    /// The media's entry ID.
+    @objc public var entryId: String?
     /// The player id and configuration the content was played on.
     @objc public var uiconfId: Int
     /// The Kaltura encoded session data.
@@ -71,12 +73,13 @@ import PlayKit
     // MARK: - Initialization
     /************************************************************/
     
-    @objc public init(partnerId: Int, ks: String?, playbackContext: String?, referrer: String?, applicationVersion: String?, playlistId: String?, customVar1: String?, customVar2: String?, customVar3: String?) {
+    @objc public init(partnerId: Int, entryId: String?, ks: String?, playbackContext: String?, referrer: String?, applicationVersion: String?, playlistId: String?, customVar1: String?, customVar2: String?, customVar3: String?) {
         self.baseUrl = defaultBaseUrl
         // uiconfId is optional, set to -1 as default
         // can be overridden
         self.uiconfId = -1
         self.partnerId = partnerId
+        self.entryId = entryId
         self.ks = ks
         self.playbackContext = playbackContext
         self.applicationVersion = applicationVersion
@@ -86,21 +89,16 @@ import PlayKit
         self.customVar3 = customVar3
         super.init()
         
-        if let referrerToBase64 = referrer {
-            if self.isValidReferrer(referrerToBase64) {
-                self.referrer = referrerToBase64
-            }
+        if let sentReferrer = referrer, self.isValidReferrer(sentReferrer) {
+            self.referrer = sentReferrer
         } else {
             PKLog.warning("Invalid referrer argument. Should start with app:// or http:// or https://")
             if let appId = applicationId {
                 self.referrer = "app://" + appId
             } else {
-                PKLog.warning("App id is not set")
+                PKLog.warning("The app's bundle identifier is not set")
             }   
         }
-        
-        // convert base64
-        self.referrer = self.referrer?.toBase64()
     }
     
     /************************************************************/

@@ -138,7 +138,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
     }
     
     func registerToBoundaries() {
-        if let player = player, boundaryObservationToken == nil {
+        if let player = player, boundaryObservationToken == nil, !player.isLive() {
             let boundaryFactory = PKBoundaryFactory(duration: player.duration)
             let boundaries = playbackPoints.map({ boundaryFactory.percentageTimeBoundary(boundary: convertToPercentage(type: $0)) })
             boundaryObservationToken = player.addBoundaryObserver(boundaries: boundaries, observeOn: nil) { [weak self] (time, percentage) in

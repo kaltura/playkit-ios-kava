@@ -88,6 +88,9 @@ class KavaHelper {
     static private func addDynamicParams(eventType: Int,
                                          kavaData: KavaPluginData,
                                          request: KalturaRequestBuilder) {
+        func kilobits(bits: Double) -> Double {
+            return bits / 1000
+        }
         
         if let currentTime = kavaData.mediaCurrentTime {
             request.setParam(key: "position", value: String(currentTime))
@@ -97,10 +100,10 @@ class KavaHelper {
         case KavaPlugin.KavaEventType.view.rawValue, KavaPlugin.KavaEventType.play.rawValue, KavaPlugin.KavaEventType.resume.rawValue:
             request.setParam(key: "bufferTime", value: String(kavaData.totalBufferingInCurrentInterval))
             request.setParam(key: "bufferTimeSum", value: String(kavaData.totalBuffering))
-            request.setParam(key: "actualBitrate", value: String(describing: kavaData.indicatedBitrate))
+            request.setParam(key: "actualBitrate", value: String(describing: kilobits(bits: kavaData.indicatedBitrate)))
             // view event has more data to be set
             if eventType == KavaPlugin.KavaEventType.view.rawValue {
-                request.setParam(key: "averageBitrate", value: String(kavaData.bitrateSum / Double(kavaData.bitrateCount)))
+                request.setParam(key: "averageBitrate", value: String(kilobits(bits: kavaData.bitrateSum / Double(kavaData.bitrateCount))))
                 request.setParam(key: "playTimeSum", value: String(kavaData.totalPlayTime))
             }
             if eventType == KavaPlugin.KavaEventType.play.rawValue {
@@ -123,7 +126,7 @@ class KavaHelper {
                 request.setParam(key: "errorCode", value: String(kavaData.errorCode))
             }
         case KavaPlugin.KavaEventType.flavorSwitched.rawValue:
-            request.setParam(key: "actualBitrate", value: String(describing: kavaData.indicatedBitrate))
+            request.setParam(key: "actualBitrate", value: String(describing: kilobits(bits: kavaData.indicatedBitrate)))
         default:
             PKLog.debug("KavaEventType accured: \(eventType)")
         }

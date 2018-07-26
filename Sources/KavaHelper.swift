@@ -88,8 +88,8 @@ class KavaHelper {
     static private func addDynamicParams(eventType: Int,
                                          kavaData: KavaPluginData,
                                          request: KalturaRequestBuilder) {
-        func kilobits(bits: Double) -> Double {
-            return bits / 1000
+        func kibibits(bits: Double) -> Double {
+            return bits / 1024
         }
         
         if let currentTime = kavaData.mediaCurrentTime {
@@ -100,10 +100,10 @@ class KavaHelper {
         case KavaPlugin.KavaEventType.view.rawValue, KavaPlugin.KavaEventType.play.rawValue, KavaPlugin.KavaEventType.resume.rawValue:
             request.setParam(key: "bufferTime", value: String(kavaData.totalBufferingInCurrentInterval))
             request.setParam(key: "bufferTimeSum", value: String(kavaData.totalBuffering))
-            request.setParam(key: "actualBitrate", value: String(describing: kilobits(bits: kavaData.indicatedBitrate)))
+            request.setParam(key: "actualBitrate", value: String(describing: kibibits(bits: kavaData.indicatedBitrate)))
             // view event has more data to be set
             if eventType == KavaPlugin.KavaEventType.view.rawValue {
-                request.setParam(key: "averageBitrate", value: String(kilobits(bits: kavaData.bitrateSum / Double(kavaData.bitrateCount))))
+                request.setParam(key: "averageBitrate", value: String(kibibits(bits: kavaData.bitrateSum / Double(kavaData.bitrateCount))))
                 request.setParam(key: "playTimeSum", value: String(kavaData.totalPlayTime))
             }
             if eventType == KavaPlugin.KavaEventType.play.rawValue {
@@ -126,7 +126,7 @@ class KavaHelper {
                 request.setParam(key: "errorCode", value: String(kavaData.errorCode))
             }
         case KavaPlugin.KavaEventType.flavorSwitched.rawValue:
-            request.setParam(key: "actualBitrate", value: String(describing: kilobits(bits: kavaData.indicatedBitrate)))
+            request.setParam(key: "actualBitrate", value: String(describing: kibibits(bits: kavaData.indicatedBitrate)))
         default:
             PKLog.debug("KavaEventType accured: \(eventType)")
         }

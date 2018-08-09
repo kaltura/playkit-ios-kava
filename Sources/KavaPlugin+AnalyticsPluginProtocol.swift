@@ -47,31 +47,32 @@ extension KavaPlugin: AnalyticsPluginProtocol {
         self.messageBus?.addObserver(self, events: playerEventsToRegister, block: { [weak self] event in
             guard let strongSelf = self else { return }
             
-            if type(of: event) == PlayerEvent.stateChanged {
+            switch event {
+            case is PlayerEvent.StateChanged:
                 strongSelf.handleStateChanged(event: event)
-            } else if type(of: event) == PlayerEvent.loadedMetadata {
+            case is PlayerEvent.LoadedMetadata:
                 strongSelf.handleLoadedMetadata()
-            } else if type(of: event) == PlayerEvent.play {
+            case is PlayerEvent.Play:
                 strongSelf.handlePlay()
-            } else if type(of: event) == PlayerEvent.pause {
+            case is PlayerEvent.Pause:
                 strongSelf.handlePause()
-            } else if type(of: event) == PlayerEvent.playing {
+            case is PlayerEvent.Playing:
                 strongSelf.handlePlaying()
-            } else if type(of: event) == PlayerEvent.seeking {
+            case is PlayerEvent.Seeking:
                 strongSelf.handleSeeking(targetSeekPosition: event.targetSeekPosition)
-            } else if type(of: event) == PlayerEvent.sourceSelected {
+            case is PlayerEvent.SourceSelected:
                 strongSelf.handleSourceSelected(mediaSource: event.mediaSource)
-            } else if type(of: event) == PlayerEvent.ended {
+            case is PlayerEvent.Ended:
                 strongSelf.handleEnded()
-            } else if type(of: event) == PlayerEvent.videoTrackChanged {
+            case is PlayerEvent.VideoTrackChanged:
                 strongSelf.handleVideoTrackChanged(event.bitrate)
-            } else if type(of: event) == PlayerEvent.audioTrackChanged {
+            case is PlayerEvent.AudioTrackChanged:
                 strongSelf.handleAudioTrackChanged(event.selectedTrack)
-            } else if type(of: event) == PlayerEvent.textTrackChanged {
+            case is PlayerEvent.TextTrackChanged:
                 strongSelf.handleTextTrackChanged(event.selectedTrack)
-            } else if type(of: event) == PlayerEvent.error {
+            case is PlayerEvent.Error:
                 strongSelf.handleError(error: event.error)
-            } else {
+            default:
                 assertionFailure("all player events must be handled")
             }
         })

@@ -32,6 +32,8 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
     let timerInterval: TimeInterval = 1
     let maxViewIdleInterval: TimeInterval = 30
     
+    var duration: TimeInterval = 0
+    
     /// Kava event types
     enum KavaEventType : Int {
         /// Media was loaded
@@ -139,7 +141,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
     
     func registerToBoundaries() {
         if let player = player, boundaryObservationToken == nil, !player.isLive() {
-            let boundaryFactory = PKBoundaryFactory(duration: player.duration)
+            let boundaryFactory = PKBoundaryFactory(duration: self.duration)
             let boundaries = playbackPoints.map({ boundaryFactory.percentageTimeBoundary(boundary: convertToPercentage(type: $0)) })
             boundaryObservationToken = player.addBoundaryObserver(boundaries: boundaries, observeOn: nil) { [weak self] (time, percentage) in
                 self?.sendPercentageReachedEvent(percentage: Int(percentage * 100))
@@ -251,12 +253,12 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
             self.kavaData.playTimeInCurrentInterval = 0
         }
         
-        self.kavaData.mediaDuration = player.duration
+        self.kavaData.mediaDuration = self.duration
         
         // Handle media current time. For live, send position against real time in "-" (minus values)
         let mediaCurrentTime: TimeInterval
         if player.isLive() {
-            let currentTime = player.currentTime - player.duration
+            let currentTime = player.currentTime - self.duration
             mediaCurrentTime = currentTime <= 0 ? currentTime : 0
         } else {
             mediaCurrentTime = player.currentTime

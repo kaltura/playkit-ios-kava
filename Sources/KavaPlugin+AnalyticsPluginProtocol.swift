@@ -30,6 +30,7 @@ extension KavaPlugin: AnalyticsPluginProtocol {
         return [
             PlayerEvent.stateChanged,
             PlayerEvent.loadedMetadata,
+            PlayerEvent.durationChanged,
             PlayerEvent.play,
             PlayerEvent.pause,
             PlayerEvent.playing,
@@ -52,6 +53,8 @@ extension KavaPlugin: AnalyticsPluginProtocol {
                 strongSelf.handleStateChanged(event: event)
             case is PlayerEvent.LoadedMetadata:
                 strongSelf.handleLoadedMetadata()
+            case is PlayerEvent.DurationChanged:
+                strongSelf.duration = event.duration as! TimeInterval
             case is PlayerEvent.Play:
                 strongSelf.handlePlay()
             case is PlayerEvent.Pause:

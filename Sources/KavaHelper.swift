@@ -128,7 +128,7 @@ class KavaHelper {
         case KavaPlugin.KavaEventType.flavorSwitched.rawValue:
             request.setParam(key: "actualBitrate", value: String(describing: kibibits(bits: kavaData.indicatedBitrate)))
         default:
-            PKLog.debug("KavaEventType accured: \(eventType)")
+            PKLog.trace("KavaEventType accured: \(eventType)")
         }
     }
     

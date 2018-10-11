@@ -92,7 +92,9 @@ import PlayKit
         if let sentReferrer = referrer, self.isValidReferrer(sentReferrer) {
             self.referrer = sentReferrer
         } else {
-            PKLog.warning("Invalid referrer argument. Should start with app:// or http:// or https://")
+            if referrer != nil {
+                PKLog.warning("Invalid referrer argument. Should start with app:// or http:// or https://")
+            }
             if let appId = applicationId {
                 self.referrer = "app://" + appId
             } else {

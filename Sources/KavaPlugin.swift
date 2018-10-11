@@ -104,7 +104,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
     }
     
     public override func onUpdateMedia(mediaConfig: MediaConfig) {
-        PKLog.debug("onUpdateMedia: \(String(describing: mediaConfig))")
+        PKLog.trace("onUpdateMedia: \(String(describing: mediaConfig))")
         super.onUpdateMedia(mediaConfig: mediaConfig)
         self.resetPlayerFlags()
         self.unregisterFromBoundaries()
@@ -120,7 +120,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
             return
         }
         
-        PKLog.debug("new config::\(String(describing: config))")
+        PKLog.trace("new config::\(String(describing: config))")
         self.config = config
     }
     
@@ -227,7 +227,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
             return
         }
         
-        PKLog.debug("Action: \(event)")
+        PKLog.trace("Action: \(event)")
         
         // Send event to messageBus
         let eventType = KavaEvent.Report(message: "Kava event: \(event) (\(event.rawValue))")
@@ -277,7 +277,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
         
         builder.add(headerKey: "User-Agent", headerValue: KavaPlugin.userAgent)
         builder.set { (response: Response) in
-            PKLog.debug("Response: \(String(describing: response))")
+            PKLog.trace("Response: \(String(describing: response))")
             
             guard let data = response.data else { return }
             
@@ -304,7 +304,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
             }
         }
         
-        print("Send Kava Event: \(builder.urlParams!)")
+        PKLog.trace("Send Kava Event: \(builder.urlParams!)")
         USRExecutor.shared.send(request: builder.build())
         
         self.eventIndex += 1

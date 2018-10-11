@@ -30,6 +30,7 @@ extension KavaPlugin: AnalyticsPluginProtocol {
         return [
             PlayerEvent.stateChanged,
             PlayerEvent.loadedMetadata,
+            PlayerEvent.durationChanged,
             PlayerEvent.play,
             PlayerEvent.pause,
             PlayerEvent.playing,
@@ -52,6 +53,8 @@ extension KavaPlugin: AnalyticsPluginProtocol {
                 strongSelf.handleStateChanged(event: event)
             case is PlayerEvent.LoadedMetadata:
                 strongSelf.handleLoadedMetadata()
+            case is PlayerEvent.DurationChanged:
+                strongSelf.duration = event.duration as! TimeInterval
             case is PlayerEvent.Play:
                 strongSelf.handlePlay()
             case is PlayerEvent.Pause:
@@ -93,11 +96,11 @@ extension KavaPlugin: AnalyticsPluginProtocol {
     /************************************************************/
     
     private func handleStateChanged(event: PKEvent) {
-        PKLog.debug("state changed event: \(event)")
+        PKLog.trace("state changed event: \(event)")
         
         switch event.newState {
         case .ready:
-            PKLog.info("media ready")
+            PKLog.trace("media ready")
             
             if let _ = bufferingStartTime {
                 self.kavaData.totalBufferingInCurrentInterval += -bufferingStartTime!.timeIntervalSinceNow
@@ -113,12 +116,12 @@ extension KavaPlugin: AnalyticsPluginProtocol {
     }
     
     private func handleLoadedMetadata() {
-        PKLog.debug("loadedMetadata event")
+        PKLog.trace("loadedMetadata event")
         self.sendMediaLoaded()
     }
     
     private func handlePlay() {
-        PKLog.debug("play event")
+        PKLog.trace("play event")
         
         if self.isFirstPlay {
             self.joinTimeStart = Date().timeIntervalSince1970
@@ -132,14 +135,14 @@ extension KavaPlugin: AnalyticsPluginProtocol {
     }
     
     private func handlePause() {
-        PKLog.debug("pause event")
+        PKLog.trace("pause event")
         self.kavaData.isPaused = true
         self.sendAnalyticsEvent(event: KavaEventType.pause)
         self.stopViewTimer()
     }
     
     private func handlePlaying() {
-        PKLog.debug("playing event")
+        PKLog.trace("playing event")
         self.kavaData.joinTime = nil
         if self.isFirstPlay {
             self.isFirstPlay = false
@@ -153,7 +156,7 @@ extension KavaPlugin: AnalyticsPluginProtocol {
     }
     
     private func handleSeeking(targetSeekPosition: NSNumber?) {
-        PKLog.debug("seeking event")
+        PKLog.trace("seeking event")
         
         if let seekPosition = targetSeekPosition {
             self.kavaData.targetSeekPosition = Double(truncating: seekPosition)
@@ -163,7 +166,7 @@ extension KavaPlugin: AnalyticsPluginProtocol {
     }
     
     private func handleSourceSelected(mediaSource: PKMediaSource?) {
-        PKLog.debug("sourceSelected event")
+        PKLog.trace("sourceSelected event")
         
         if let source = mediaSource {
             self.kavaData.selectedSource = source
@@ -172,13 +175,13 @@ extension KavaPlugin: AnalyticsPluginProtocol {
     }
     
     private func handleEnded() {
-        PKLog.debug("ended event")
+        PKLog.trace("ended event")
         self.sendPercentageReachedEvent(percentage: 100)
         self.stopViewTimer()
     }
     
     private func handleVideoTrackChanged(_ videoTrack: NSNumber?) {
-        PKLog.debug("videoTrackChanged event")
+        PKLog.trace("videoTrackChanged event")
         
         if let bitrate = videoTrack {
             self.kavaData.indicatedBitrate = bitrate.doubleValue
@@ -187,7 +190,7 @@ extension KavaPlugin: AnalyticsPluginProtocol {
     }
     
     private func handleAudioTrackChanged(_ audioTrack: Track?) {
-        PKLog.debug("audioTrackChanged event")
+        PKLog.trace("audioTrackChanged event")
         
         if let track = audioTrack {
             if (track.language != nil) {
@@ -198,7 +201,7 @@ extension KavaPlugin: AnalyticsPluginProtocol {
     }
     
     private func handleTextTrackChanged(_ textTrack: Track?) {
-        PKLog.debug("textTrackChanged event")
+        PKLog.trace("textTrackChanged event")
         
         let textOffDisplay: String = "Off"
         
@@ -216,7 +219,7 @@ extension KavaPlugin: AnalyticsPluginProtocol {
     }
     
     private func handleError(error: NSError?) {
-        PKLog.debug("error event")
+        PKLog.trace("error event")
         
         if let err = error {
             self.kavaData.errorCode = err.code

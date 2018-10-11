@@ -32,6 +32,8 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
     let timerInterval: TimeInterval = 1
     let maxViewIdleInterval: TimeInterval = 30
     
+    var duration: TimeInterval = 0
+    
     /// Kava event types
     enum KavaEventType : Int {
         /// Media was loaded
@@ -102,7 +104,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
     }
     
     public override func onUpdateMedia(mediaConfig: MediaConfig) {
-        PKLog.debug("onUpdateMedia: \(String(describing: mediaConfig))")
+        PKLog.trace("onUpdateMedia: \(String(describing: mediaConfig))")
         super.onUpdateMedia(mediaConfig: mediaConfig)
         self.resetPlayerFlags()
         self.unregisterFromBoundaries()
@@ -118,7 +120,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
             return
         }
         
-        PKLog.debug("new config::\(String(describing: config))")
+        PKLog.trace("new config::\(String(describing: config))")
         self.config = config
     }
     
@@ -139,7 +141,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
     
     func registerToBoundaries() {
         if let player = player, boundaryObservationToken == nil, !player.isLive() {
-            let boundaryFactory = PKBoundaryFactory(duration: player.duration)
+            let boundaryFactory = PKBoundaryFactory(duration: self.duration)
             let boundaries = playbackPoints.map({ boundaryFactory.percentageTimeBoundary(boundary: convertToPercentage(type: $0)) })
             boundaryObservationToken = player.addBoundaryObserver(boundaries: boundaries, observeOn: nil) { [weak self] (time, percentage) in
                 self?.sendPercentageReachedEvent(percentage: Int(percentage * 100))
@@ -225,7 +227,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
             return
         }
         
-        PKLog.debug("Action: \(event)")
+        PKLog.trace("Action: \(event)")
         
         // Send event to messageBus
         let eventType = KavaEvent.Report(message: "Kava event: \(event) (\(event.rawValue))")
@@ -251,12 +253,12 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
             self.kavaData.playTimeInCurrentInterval = 0
         }
         
-        self.kavaData.mediaDuration = player.duration
+        self.kavaData.mediaDuration = self.duration
         
         // Handle media current time. For live, send position against real time in "-" (minus values)
         let mediaCurrentTime: TimeInterval
         if player.isLive() {
-            let currentTime = player.currentTime - player.duration
+            let currentTime = player.currentTime - self.duration
             mediaCurrentTime = currentTime <= 0 ? currentTime : 0
         } else {
             mediaCurrentTime = player.currentTime
@@ -275,7 +277,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
         
         builder.add(headerKey: "User-Agent", headerValue: KavaPlugin.userAgent)
         builder.set { (response: Response) in
-            PKLog.debug("Response: \(String(describing: response))")
+            PKLog.trace("Response: \(String(describing: response))")
             
             guard let data = response.data else { return }
             
@@ -302,7 +304,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
             }
         }
         
-        print("Send Kava Event: \(builder.urlParams!)")
+        PKLog.trace("Send Kava Event: \(builder.urlParams!)")
         USRExecutor.shared.send(request: builder.build())
         
         self.eventIndex += 1

@@ -36,6 +36,7 @@ extension KavaPlugin: AnalyticsPluginProtocol {
             PlayerEvent.seeking,
             PlayerEvent.sourceSelected,
             PlayerEvent.ended,
+            PlayerEvent.replay,
             PlayerEvent.textTrackChanged,
             PlayerEvent.audioTrackChanged,
             PlayerEvent.videoTrackChanged,
@@ -64,6 +65,8 @@ extension KavaPlugin: AnalyticsPluginProtocol {
                 strongSelf.handleSourceSelected(mediaSource: event.mediaSource)
             case is PlayerEvent.Ended:
                 strongSelf.handleEnded()
+            case is PlayerEvent.Replay:
+                strongSelf.handleReplay()
             case is PlayerEvent.VideoTrackChanged:
                 strongSelf.handleVideoTrackChanged(event.bitrate)
             case is PlayerEvent.AudioTrackChanged:
@@ -125,10 +128,6 @@ extension KavaPlugin: AnalyticsPluginProtocol {
         }
         
         self.sendAnalyticsEvent(event: KavaEventType.playRequest)
-        
-        if self.sentPlaybackPoints[KavaEventType.playReached100Percent] == true {
-            self.sendAnalyticsEvent(event: KavaEventType.replay)
-        }
     }
     
     private func handlePause() {
@@ -175,6 +174,11 @@ extension KavaPlugin: AnalyticsPluginProtocol {
         PKLog.debug("ended event")
         self.sendPercentageReachedEvent(percentage: 100)
         self.stopViewTimer()
+    }
+    
+    private func handleReplay() {
+        PKLog.debug("replay event")
+        self.sendAnalyticsEvent(event: KavaEventType.replay)
     }
     
     private func handleVideoTrackChanged(_ videoTrack: NSNumber?) {

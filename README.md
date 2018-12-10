@@ -13,7 +13,7 @@ PlayKit Kava Plugin is available through [CocoaPods](https://cocoapods.org/?q=Pl
 ```
 pod "PlayKitKava"
 ```
-Full documantation about **Kava Plugin** can be found [here](https://kaltura.github.io/playkit-ios-kava/).
+Full documantation about **Kava Plugin** can be found [here](https://kaltura.github.io/playkit/guide/ios/plugins/kava).
 
 ## Requirements
 

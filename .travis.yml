@@ -5,7 +5,7 @@ before_install:
   - gem install xcpretty
 script:
   - pod repo update
-  - pod spec lint --allow-warnings
+  - pod lib lint --allow-warnings
 notifications:
   email:
     recipients:

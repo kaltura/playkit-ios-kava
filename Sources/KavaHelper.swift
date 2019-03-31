@@ -105,6 +105,12 @@ class KavaHelper {
             if eventType == KavaPlugin.KavaEventType.view.rawValue {
                 request.setParam(key: "averageBitrate", value: String(kibibits(bits: kavaData.bitrateSum / Double(kavaData.bitrateCount))))
                 request.setParam(key: "playTimeSum", value: String(kavaData.totalPlayTime))
+                if let currentAudioLanguage = kavaData.currentAudioLanguage {
+                    request.setParam(key: "audioLanguage", value: currentAudioLanguage)
+                }
+                if let currentCaptionLanguage = kavaData.currentCaptionLanguage {
+                    request.setParam(key: "captionsLanguage", value: currentCaptionLanguage)
+                }
             }
             if eventType == KavaPlugin.KavaEventType.play.rawValue {
                 if let joinTime = kavaData.joinTime {

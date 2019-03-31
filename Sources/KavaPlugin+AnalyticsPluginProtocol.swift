@@ -46,43 +46,43 @@ extension KavaPlugin: AnalyticsPluginProtocol {
     
     public func registerEvents() {
         self.messageBus?.addObserver(self, events: playerEventsToRegister, block: { [weak self] event in
-            guard let strongSelf = self else { return }
+            guard let self = self else { return }
             
             switch event {
             case is PlayerEvent.StateChanged:
-                strongSelf.handleStateChanged(event: event)
+                self.handleStateChanged(event: event)
             case is PlayerEvent.LoadedMetadata:
-                strongSelf.handleLoadedMetadata()
+                self.handleLoadedMetadata()
             case is PlayerEvent.Play:
-                strongSelf.handlePlay()
+                self.handlePlay()
             case is PlayerEvent.Pause:
-                strongSelf.handlePause()
+                self.handlePause()
             case is PlayerEvent.Playing:
-                strongSelf.handlePlaying()
+                self.handlePlaying()
             case is PlayerEvent.Seeking:
-                strongSelf.handleSeeking(targetSeekPosition: event.targetSeekPosition)
+                self.handleSeeking(targetSeekPosition: event.targetSeekPosition)
             case is PlayerEvent.SourceSelected:
-                strongSelf.handleSourceSelected(mediaSource: event.mediaSource)
+                self.handleSourceSelected(mediaSource: event.mediaSource)
             case is PlayerEvent.Ended:
-                strongSelf.handleEnded()
+                self.handleEnded()
             case is PlayerEvent.Replay:
-                strongSelf.handleReplay()
+                self.handleReplay()
             case is PlayerEvent.VideoTrackChanged:
-                strongSelf.handleVideoTrackChanged(event.bitrate)
+                self.handleVideoTrackChanged(event.bitrate)
             case is PlayerEvent.AudioTrackChanged:
-                strongSelf.handleAudioTrackChanged(event.selectedTrack)
+                self.handleAudioTrackChanged(event.selectedTrack)
             case is PlayerEvent.TextTrackChanged:
-                strongSelf.handleTextTrackChanged(event.selectedTrack)
+                self.handleTextTrackChanged(event.selectedTrack)
             case is PlayerEvent.Error:
-                strongSelf.handleError(error: event.error)
+                self.handleError(error: event.error)
             default:
                 assertionFailure("all player events must be handled")
             }
         })
         
         self.messageBus?.addObserver(self, events: [AdEvent.error], block: { [weak self] (event) in
-            guard let strongSelf = self else { return }
-            strongSelf.handleError(error: event.error)
+            guard let self = self else { return }
+            self.handleError(error: event.error)
         })
     }
     

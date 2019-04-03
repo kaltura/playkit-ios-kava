@@ -5,7 +5,7 @@ suffix = '-dev'   # Dev mode
 Pod::Spec.new do |s|
     
     s.name                    = 'PlayKitKava'
-    s.version                 = '1.0.5' + suffix
+    s.version                 = '1.1.0' + suffix
     s.summary                 = 'PlayKitKava -- Analytics framework for iOS'
     s.homepage                = 'https://github.com/kaltura/playkit-ios-kava'
     s.license                 = { :type => 'AGPLv3', :file => 'LICENSE' }

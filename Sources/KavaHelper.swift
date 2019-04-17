@@ -16,6 +16,7 @@ import KalturaNetKit
 class KavaHelper {
     
     static func builder(config: KavaPluginConfig,
+                        mediaType: MediaType,
                         eventType: KavaPlugin.KavaEventType.RawValue,
                         eventIndex: Int,
                         kavaData: KavaPluginData,
@@ -33,6 +34,7 @@ class KavaHelper {
                            request: request)
             
             addMediaTypeParam(config: config,
+                              mediaType: mediaType,
                               kavaData: kavaData,
                               request: request,
                               player: player)
@@ -138,32 +140,36 @@ class KavaHelper {
         }
     }
     
+    static func isLiveMedia(mediaType: MediaType, config: KavaPluginConfig, player: Player) -> Bool {
+        
+        // For the most reliable result, check the declared media type
+        if mediaType == .live || mediaType == .dvrLive {
+            return true
+        } else if mediaType == .vod {
+            return false
+        }
+        
+        // MediaType is not set, try the config object
+        if config.playbackType == .live {
+            return true
+        } else if config.playbackType == .vod {
+            return false
+        }
+        
+        // Not in config -- ask the player
+        return player.isLive()
+    }
+    
     static private func addMediaTypeParam(config: KavaPluginConfig,
+                                          mediaType: MediaType,
                                           kavaData: KavaPluginData,
                                           request: KalturaRequestBuilder,
                                           player: Player) {
-        // Media type is known from  media provider
-        if config.isLive != nil {
-            // Media is VOD
+        
+        if isLiveMedia(mediaType: mediaType, config: config, player: player) {
+            handleLive(kavaData: kavaData, config: config, request: request)
+        } else {
             handleVod(request: request)
-        } else if player.isLive() {
-            // Media is Live
-            handleLive(kavaData: kavaData,
-                       config: config,
-                       request: request)
-        }
-        // When not using providers/ media type is not known
-        // Get it from config
-        else {
-            switch config.playbackType {
-            case KavaPluginConfig.PlaybackType.unknown:
-                // should be asserted when PlaybackType is not set
-                assertionFailure("media type on KavaPluginConfig is not set when providers are not used.")
-            case KavaPluginConfig.PlaybackType.live:
-                handleLive(kavaData: kavaData, config: config, request: request)
-            case KavaPluginConfig.PlaybackType.vod:
-                handleVod(request: request)
-            }
         }
     }
     

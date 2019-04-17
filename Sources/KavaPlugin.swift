@@ -80,6 +80,8 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
     var lastEventSentTime: TimeInterval = 0
     var joinTimeStart: TimeInterval = 0
     var isViewEventsEnabled = true
+    var declaredMediaType: MediaType = .unknown
+    
     /// A sequence number which describe the order of events in a viewing session.
     private var eventIndex = 1
     
@@ -107,7 +109,8 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
         self.resetPlayerFlags()
         self.unregisterFromBoundaries()
         self.stopViewTimer()
-        self.setMediaConfigParams()
+        
+        self.declaredMediaType = mediaConfig.mediaEntry.mediaType
     }
     
     public override func onUpdateConfig(pluginConfig: Any) {
@@ -264,7 +267,8 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
         }
         self.kavaData.mediaCurrentTime = mediaCurrentTime
         
-        guard let builder: KalturaRequestBuilder = KavaHelper.builder(config: self.config,
+        guard let builder: KalturaRequestBuilder = KavaHelper.builder(config: self.config, 
+                                                                      mediaType: declaredMediaType,
                                                                       eventType: event.rawValue,
                                                                       eventIndex: self.eventIndex,
                                                                       kavaData: self.kavaData,
@@ -308,19 +312,6 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
         
         self.eventIndex += 1
         self.kavaData.totalBufferingInCurrentInterval = TimeInterval()
-    }
-    
-    /* ***********************************************************/
-    // MARK: - Private Functions
-    /* ***********************************************************/
-    
-    /// On media changed config internal params are set.
-    private func setMediaConfigParams() {
-        
-        // If media is vod, set isLive param only once.
-        if let player = self.player, !player.isLive() {
-            self.config.isLive = player.isLive()
-        }
     }
 }
 

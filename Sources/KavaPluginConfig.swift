@@ -66,7 +66,6 @@ import PlayKit
     /************************************************************/
     
     var sessionStartTime: String?
-    var isLive: Bool?
     var hasDVR: Bool?
     
     /************************************************************/

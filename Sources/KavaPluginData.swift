@@ -68,11 +68,8 @@ class KavaPluginData {
 }
 
 extension KavaPluginData {
-    static func hasDVR(duration: Double,
-                       currentTime: Double,
-                       dvrThreshold: Int) -> Bool {
+    static func inDVRState(duration: Double, currentTime: Double, dvrThreshold: Int) -> Bool {
         let distanceFromLive = duration - currentTime
-        
         return distanceFromLive >= Double(dvrThreshold)
     }
 }

@@ -256,16 +256,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
         }
         
         self.kavaData.mediaDuration = player.duration
-        
-        // Handle media current time. For live, send position against real time in "-" (minus values)
-        let mediaCurrentTime: TimeInterval
-        if player.isLive() {
-            let currentTime = player.currentTime - player.duration
-            mediaCurrentTime = currentTime <= 0 ? currentTime : 0
-        } else {
-            mediaCurrentTime = player.currentTime
-        }
-        self.kavaData.mediaCurrentTime = mediaCurrentTime
+        self.kavaData.mediaCurrentTime = player.currentTime
         
         guard let builder: KalturaRequestBuilder = KavaHelper.builder(config: self.config, 
                                                                       mediaType: declaredMediaType,

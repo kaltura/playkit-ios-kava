@@ -182,9 +182,7 @@ class KavaHelper {
                                    request: KalturaRequestBuilder) {
         if let duration = kavaData.mediaDuration,
             let currentTime = kavaData.mediaCurrentTime {
-            if KavaPluginData.hasDVR(duration: duration,
-                                     currentTime: currentTime,
-                                     dvrThreshold: config.dvrThreshold) {
+            if KavaPluginData.inDVRState(duration: duration, currentTime: currentTime, dvrThreshold: config.dvrThreshold) {
                 request.setParam(key: "playbackType", value: "dvr")
             } else {
                 request.setParam(key: "playbackType", value: "live")

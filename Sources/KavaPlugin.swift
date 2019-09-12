@@ -269,6 +269,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
                 return
         }
         
+        builder.set(method: .get)
         builder.add(headerKey: "User-Agent", headerValue: KavaPlugin.userAgent)
         builder.set { (response: Response) in
             PKLog.debug("Response: \(String(describing: response))")

@@ -64,6 +64,10 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
         case audioSelected = 42
         /// The video track has changed to a different bitrate (indicated bitrate).
         case flavorSwitched = 43
+        /// Buffering has started. (Not for first load)
+        case bufferStart = 45
+        /// Buffering has ended. (Not for first load)
+        case bufferEnd = 46
         /// Error event was triggred
         case error = 98
         /// Sent every 10 seconds of active playback.
@@ -75,6 +79,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
     var boundaryObservationToken: UUID?
     var viewTimer: Timer?
     var bufferingStartTime: Date?
+    var rebufferStarted = false
     var kavaData = KavaPluginData()
     var currentViewTime: TimeInterval = 0
     var lastEventSentTime: TimeInterval = 0
@@ -203,6 +208,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
         self.kavaData.isFirstPlay = true
         self.kavaData.errorCode = -1
         self.bufferingStartTime = nil
+        self.rebufferStarted = false
         self.kavaData.totalBuffering = 0
         self.kavaData.totalBufferingInCurrentInterval = 0
         self.eventIndex = 1

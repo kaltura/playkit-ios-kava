@@ -107,10 +107,25 @@ extension KavaPlugin: AnalyticsPluginProtocol {
                 bufferingStartTime = nil
             }
             
+            if self.rebufferStarted {
+                self.rebufferStarted = false
+                self.sendAnalyticsEvent(event: KavaEventType.bufferEnd)
+            }
+            
             self.sendMediaLoaded()
             self.registerToBoundaries()
         case .buffering:
             bufferingStartTime = Date()
+            
+            if !self.isFirstPlay {
+                self.rebufferStarted = true
+                self.sendAnalyticsEvent(event: KavaEventType.bufferStart)
+            }
+        case .ended:
+            if self.rebufferStarted {
+                self.rebufferStarted = false
+                self.sendAnalyticsEvent(event: KavaEventType.bufferEnd)
+            }
         default: break
         }
     }

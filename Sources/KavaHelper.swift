@@ -84,6 +84,10 @@ class KavaHelper {
         if let sessionStartTime = config.sessionStartTime {
             request.setParam(key: "sessionStartTime", value: sessionStartTime)
         }
+        
+        if let userId = config.userId {
+            request.setParam(key: "userId", value: userId)
+        }
     }
     
     /// Adds params that are changed during playback.

@@ -43,6 +43,8 @@ import PlayKit
     @objc public var uiconfId: Int
     /// The Kaltura encoded session data.
     @objc public var ks: String?
+    /// The users id.
+    @objc public var userId: String?
     /// The category id describing the current played context.
     @objc public var playbackContext: String?
     /// Received from plugin config if nothing there take app id wit relavant prefix.
@@ -72,7 +74,7 @@ import PlayKit
     // MARK: - Initialization
     /************************************************************/
     
-    @objc public init(partnerId: Int, entryId: String?, ks: String?, playbackContext: String?, referrer: String?, applicationVersion: String?, playlistId: String?, customVar1: String?, customVar2: String?, customVar3: String?) {
+    @objc public init(partnerId: Int, entryId: String? = nil, ks: String? = nil, userId: String? = nil, playbackContext: String? = nil, referrer: String? = nil, applicationVersion: String? = nil, playlistId: String? = nil, customVar1: String? = nil, customVar2: String? = nil, customVar3: String? = nil) {
         self.baseUrl = defaultBaseUrl
         // uiconfId is optional, set to -1 as default
         // can be overridden
@@ -80,6 +82,7 @@ import PlayKit
         self.partnerId = partnerId
         self.entryId = entryId
         self.ks = ks
+        self.userId = userId
         self.playbackContext = playbackContext
         self.applicationVersion = applicationVersion
         self.playlistId = playlistId

@@ -17,7 +17,7 @@ import SwiftyJSON
 /************************************************************/
 
 /// playbackPoints Array represents points in %, that show how much was reached from playback
-let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playReached25Percent, KavaPlugin.KavaEventType.playReached50Percent, KavaPlugin.KavaEventType.playReached75Percent, KavaPlugin.KavaEventType.playReached100Percent]
+let playbackPoints: [KavaPlugin.EventType] = [KavaPlugin.EventType.playReached25Percent, KavaPlugin.EventType.playReached50Percent, KavaPlugin.EventType.playReached75Percent, KavaPlugin.EventType.playReached100Percent]
 
 /************************************************************/
 // MARK: - KavaPlugin
@@ -33,7 +33,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
     let maxViewIdleInterval: TimeInterval = 30
     
     /// Kava event types
-    enum KavaEventType : Int {
+    enum EventType: Int, CustomStringConvertible {
         /// Media was loaded
         case impression = 1
         /// Play event was triggred
@@ -72,10 +72,53 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
         case error = 98
         /// Sent every 10 seconds of active playback.
         case view = 99
+        
+        var description: String {
+            switch self {
+            case .impression:
+                return "impression"
+            case .playRequest:
+                return "playRequest"
+            case .play:
+                return "play"
+            case .resume:
+                return "resume"
+            case .playReached25Percent:
+                return "playReached25Percent"
+            case .playReached50Percent:
+                return "playReached50Percent"
+            case .playReached75Percent:
+                return "playReached75Percent"
+            case .playReached100Percent:
+                return "playReached100Percent"
+            case .pause:
+                return "pause"
+            case .replay:
+                return "replay"
+            case .seek:
+                return "seek"
+            case .captions:
+                return "captions"
+            case .sourceSelected:
+                return "sourceSelected"
+            case .audioSelected:
+                return "audioSelected"
+            case .flavorSwitched:
+                return "flavorSwitched"
+            case .bufferStart:
+                return "bufferStart"
+            case .bufferEnd:
+                return "bufferEnd"
+            case .error:
+                return "error"
+            case .view:
+                return "view"
+            }
+        }
     }
     
     var config: KavaPluginConfig
-    var sentPlaybackPoints: [KavaEventType : Bool] = KavaPlugin.cleanPlaybackPoints()
+    var sentPlaybackPoints: [EventType : Bool] = KavaPlugin.cleanPlaybackPoints()
     var boundaryObservationToken: UUID?
     var viewTimer: Timer?
     var bufferingStartTime: Date?
@@ -137,8 +180,8 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
         super.destroy()
     }
     
-    static func cleanPlaybackPoints() -> [KavaEventType : Bool] {
-        return playbackPoints.reduce([KavaEventType : Bool]()) { (dict, point) -> [KavaEventType : Bool] in
+    static func cleanPlaybackPoints() -> [EventType : Bool] {
+        return playbackPoints.reduce([EventType : Bool]()) { (dict, point) -> [EventType : Bool] in
             var dict = dict
             dict[point] = false
             return dict
@@ -207,6 +250,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
         self.sentPlaybackPoints = KavaPlugin.cleanPlaybackPoints()
         self.kavaData.isFirstPlay = true
         self.kavaData.errorCode = -1
+        self.kavaData.errorDetails = nil
         self.bufferingStartTime = nil
         self.rebufferStarted = false
         self.kavaData.totalBuffering = 0
@@ -216,7 +260,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
     }
     
     func sendPercentageReachedEvent(percentage: Int) {
-        var eventsToSend: [KavaEventType] = []
+        var eventsToSend: [EventType] = []
         for item in sentPlaybackPoints {
             if item.value == false && convertToPercentage(type: item.key) <= percentage {
                 eventsToSend.append(item.key)
@@ -229,7 +273,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
         }
     }
     
-    func sendAnalyticsEvent(event: KavaEventType) {
+    func sendAnalyticsEvent(event: EventType) {
         guard let player = self.player else {
             PKLog.warning("Player/ MediaEntry is nil")
             return
@@ -266,7 +310,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
         
         guard let builder: KalturaRequestBuilder = KavaHelper.builder(config: self.config, 
                                                                       mediaType: declaredMediaType,
-                                                                      eventType: event.rawValue,
+                                                                      eventType: event,
                                                                       eventIndex: self.eventIndex,
                                                                       kavaData: self.kavaData,
                                                                       player: player)
@@ -305,7 +349,7 @@ let playbackPoints: [KavaPlugin.KavaEventType] = [KavaPlugin.KavaEventType.playR
             }
         }
         
-        print("Send Kava Event: \(builder.urlParams!)")
+        PKLog.debug("Sending Kava Event, \(event) (\(event.rawValue)): \(builder.urlParams!)")
         USRExecutor.shared.send(request: builder.build())
         
         self.eventIndex += 1
@@ -325,7 +369,7 @@ extension PKEvent {
 }
 
 extension KavaPlugin {
-    func convertToPercentage(type: KavaEventType) -> Int {
+    func convertToPercentage(type: EventType) -> Int {
         switch type {
         case .playReached25Percent:
             return 25

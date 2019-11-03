@@ -109,7 +109,7 @@ extension KavaPlugin: AnalyticsPluginProtocol {
             
             if self.rebufferStarted {
                 self.rebufferStarted = false
-                self.sendAnalyticsEvent(event: KavaEventType.bufferEnd)
+                self.sendAnalyticsEvent(event: EventType.bufferEnd)
             }
             
             self.sendMediaLoaded()
@@ -119,12 +119,12 @@ extension KavaPlugin: AnalyticsPluginProtocol {
             
             if !self.isFirstPlay {
                 self.rebufferStarted = true
-                self.sendAnalyticsEvent(event: KavaEventType.bufferStart)
+                self.sendAnalyticsEvent(event: EventType.bufferStart)
             }
         case .ended:
             if self.rebufferStarted {
                 self.rebufferStarted = false
-                self.sendAnalyticsEvent(event: KavaEventType.bufferEnd)
+                self.sendAnalyticsEvent(event: EventType.bufferEnd)
             }
         default: break
         }
@@ -142,13 +142,13 @@ extension KavaPlugin: AnalyticsPluginProtocol {
             self.joinTimeStart = Date().timeIntervalSince1970
         }
         
-        self.sendAnalyticsEvent(event: KavaEventType.playRequest)
+        self.sendAnalyticsEvent(event: EventType.playRequest)
     }
     
     private func handlePause() {
         PKLog.debug("pause event")
         self.kavaData.isPaused = true
-        self.sendAnalyticsEvent(event: KavaEventType.pause)
+        self.sendAnalyticsEvent(event: EventType.pause)
         self.stopViewTimer()
     }
     
@@ -158,9 +158,9 @@ extension KavaPlugin: AnalyticsPluginProtocol {
         if self.isFirstPlay {
             self.isFirstPlay = false
             self.kavaData.joinTime = Date().timeIntervalSince1970 - self.joinTimeStart
-            self.sendAnalyticsEvent(event: KavaEventType.play)
+            self.sendAnalyticsEvent(event: EventType.play)
         } else if self.kavaData.isPaused {
-            self.sendAnalyticsEvent(event: KavaEventType.resume)
+            self.sendAnalyticsEvent(event: EventType.resume)
         }
         self.kavaData.isPaused = false
         self.setupViewTimer()
@@ -173,7 +173,7 @@ extension KavaPlugin: AnalyticsPluginProtocol {
             self.kavaData.targetSeekPosition = Double(truncating: seekPosition)
         }
         
-        self.sendAnalyticsEvent(event: KavaEventType.seek)
+        self.sendAnalyticsEvent(event: EventType.seek)
     }
     
     private func handleSourceSelected(mediaSource: PKMediaSource?) {
@@ -193,7 +193,7 @@ extension KavaPlugin: AnalyticsPluginProtocol {
     
     private func handleReplay() {
         PKLog.debug("replay event")
-        self.sendAnalyticsEvent(event: KavaEventType.replay)
+        self.sendAnalyticsEvent(event: EventType.replay)
     }
     
     private func handleVideoTrackChanged(_ videoTrack: NSNumber?) {
@@ -201,7 +201,7 @@ extension KavaPlugin: AnalyticsPluginProtocol {
         
         if let bitrate = videoTrack {
             self.kavaData.indicatedBitrate = bitrate.doubleValue
-            self.sendAnalyticsEvent(event: KavaEventType.flavorSwitched)
+            self.sendAnalyticsEvent(event: EventType.flavorSwitched)
         }
     }
     
@@ -211,7 +211,7 @@ extension KavaPlugin: AnalyticsPluginProtocol {
         if let track = audioTrack {
             if (track.language != nil) {
                 self.kavaData.currentAudioLanguage = track.language
-                self.sendAnalyticsEvent(event: KavaEventType.audioSelected)
+                self.sendAnalyticsEvent(event: EventType.audioSelected)
             }
         }
     }
@@ -224,11 +224,11 @@ extension KavaPlugin: AnalyticsPluginProtocol {
         if let track = textTrack {
             if (track.language != nil) {
                 self.kavaData.currentCaptionLanguage = track.language
-                self.sendAnalyticsEvent(event: KavaEventType.captions)
+                self.sendAnalyticsEvent(event: EventType.captions)
             } else {
                 if (track.title == textOffDisplay) {
                     self.kavaData.currentCaptionLanguage = "none"
-                    self.sendAnalyticsEvent(event: KavaEventType.captions)
+                    self.sendAnalyticsEvent(event: EventType.captions)
                 }
             }
         }
@@ -239,14 +239,15 @@ extension KavaPlugin: AnalyticsPluginProtocol {
         
         if let err = error {
             self.kavaData.errorCode = err.code
-            self.sendAnalyticsEvent(event: KavaEventType.error)
+            self.kavaData.errorDetails = err.localizedDescription
+            self.sendAnalyticsEvent(event: EventType.error)
         }
     }
     
     private func sendMediaLoaded() {
         if !self.kavaData.isMediaLoaded {
             self.kavaData.isMediaLoaded = true
-            sendAnalyticsEvent(event: KavaEventType.impression)
+            sendAnalyticsEvent(event: EventType.impression)
         }
     }
     

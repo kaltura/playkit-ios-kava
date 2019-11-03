@@ -51,6 +51,8 @@ class KavaPluginData {
     var bitrateCount: Int = 0
     /// Error Code will be -1 unless it's player/ ad error.
     var errorCode: Int = -1
+    /// The error's details.
+    var errorDetails: String?
     /// Language of the selected caption.
     var currentCaptionLanguage: String?
     /// Language of the selected audio track.

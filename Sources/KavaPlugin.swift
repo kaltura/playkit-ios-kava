@@ -322,7 +322,7 @@ let playbackPoints: [KavaPlugin.EventType] = [KavaPlugin.EventType.playReached25
         builder.set(method: .get)
         builder.add(headerKey: "User-Agent", headerValue: KavaPlugin.userAgent)
         builder.set { (response: Response) in
-            PKLog.debug("Response: \(String(describing: response))")
+            PKLog.debug("Response:\nStatus Code: \(response.statusCode)\nError: \(response.error?.localizedDescription ?? "")\nData: \(response.data ?? "")")
             
             guard let data = response.data else { return }
             

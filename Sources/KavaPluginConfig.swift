@@ -31,7 +31,7 @@ import PlayKit
     // MARK: - Properties
     /************************************************************/
     
-    private let defaultBaseUrl = "http://analytics.kaltura.com/api_v3/index.php"
+    private let defaultBaseUrl = "https://analytics.kaltura.com/api_v3/index.php"
     
     /// application ID.
     let applicationId = Bundle.main.bundleIdentifier

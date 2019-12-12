@@ -18,7 +18,7 @@ Pod::Spec.new do |s|
 
     s.source_files            = 'Sources/*'
 
-    s.dependency 'PlayKit/Core', '~> 3.16'
+    s.dependency 'PlayKit/Core'
     s.dependency 'PlayKit/AnalyticsCommon'
 end
 

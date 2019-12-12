@@ -26,8 +26,6 @@ let playbackPoints: [KavaPlugin.EventType] = [KavaPlugin.EventType.playReached25
 /// This class represents Kaltura real time analytics for live and on-demand video.
 @objc public class KavaPlugin: BasePlugin {
     
-    private static let userAgent = "\(Bundle.main.bundleIdentifier ?? "") \(PlayKitManager.clientTag) (\(UIDevice.current.model); CPU OS \(ProcessInfo().operatingSystemVersion.majorVersion)_\(ProcessInfo().operatingSystemVersion.minorVersion)_\(ProcessInfo().operatingSystemVersion.patchVersion) like Mac OS X; \(Locale.current.identifier.lowercased()))"
-    
     let viewInterval: TimeInterval = 10
     let timerInterval: TimeInterval = 1
     let maxViewIdleInterval: TimeInterval = 30
@@ -320,7 +318,7 @@ let playbackPoints: [KavaPlugin.EventType] = [KavaPlugin.EventType.playReached25
         }
         
         builder.set(method: .get)
-        builder.add(headerKey: "User-Agent", headerValue: KavaPlugin.userAgent)
+        builder.add(headerKey: "User-Agent", headerValue: PlayKitManager.userAgent)
         builder.set { (response: Response) in
             PKLog.debug("Response:\nStatus Code: \(response.statusCode)\nError: \(response.error?.localizedDescription ?? "")\nData: \(response.data ?? "")")
             

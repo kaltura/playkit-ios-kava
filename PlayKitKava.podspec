@@ -18,8 +18,7 @@ Pod::Spec.new do |s|
 
     s.source_files            = 'Sources/*'
 
-    s.dependency 'PlayKit/Core', '~> 3.16'
-    s.dependency 'PlayKit/AnalyticsCommon'
+    s.dependency 'PlayKit/AnalyticsCommon', '~> 3.16' + suffix
 end
 
 # To add playkit kava as dependecy use: s.dependency 'PlayKitKava', 'version_number'

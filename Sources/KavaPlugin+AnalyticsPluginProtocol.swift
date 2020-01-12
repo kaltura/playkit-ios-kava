@@ -79,16 +79,10 @@ extension KavaPlugin: AnalyticsPluginProtocol {
                 assertionFailure("all player events must be handled")
             }
         })
-        
-        self.messageBus?.addObserver(self, events: [AdEvent.error], block: { [weak self] (event) in
-            guard let self = self else { return }
-            self.handleError(error: event.error)
-        })
     }
     
     public func unregisterEvents() {
         self.messageBus?.removeObserver(self, events: playerEventsToRegister)
-        self.messageBus?.removeObserver(self, events: [AdEvent.error])
     }
     
     /************************************************************/

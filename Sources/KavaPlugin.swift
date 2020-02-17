@@ -249,6 +249,7 @@ let playbackPoints: [KavaPlugin.EventType] = [KavaPlugin.EventType.playReached25
         self.kavaData.isFirstPlay = true
         self.kavaData.errorCode = -1
         self.kavaData.errorDetails = nil
+        self.kavaData.errorPosition = .videoStart
         self.bufferingStartTime = nil
         self.rebufferStarted = false
         self.kavaData.totalBuffering = 0

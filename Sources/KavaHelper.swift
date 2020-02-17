@@ -141,6 +141,7 @@ class KavaHelper {
             if (kavaData.errorCode != -1) {
                 request.setParam(key: "errorCode", value: String(kavaData.errorCode))
                 request.setParam(key: "errorDetails", value: kavaData.errorDetails ?? "")
+                request.setParam(key: "errorPosition", value: kavaData.errorPosition.description)
             }
             
         case KavaPlugin.EventType.flavorSwitched:

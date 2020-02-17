@@ -25,6 +25,18 @@ class KavaPluginData {
         case url
     }
     
+    enum ErrorPosition: Int, CustomStringConvertible {
+        case videoStart = 1
+        case midStream = 2
+        
+        var description: String {
+            switch self {
+            case .videoStart: return "1"
+            case .midStream: return "2"
+            }
+        }
+    }
+    
     /************************************************************/
     // MARK: - Properties
     /************************************************************/
@@ -49,10 +61,12 @@ class KavaPluginData {
     var bitrateSum: Double = 0
     /// The selected track bitrate counts. used to get the average later.
     var bitrateCount: Int = 0
-    /// Error Code will be -1 unless it's player/ ad error.
+    /// Error Code will be -1 unless it's player error.
     var errorCode: Int = -1
     /// The error's details.
     var errorDetails: String?
+    /// The position of the player when the error was recieved.
+    var errorPosition: ErrorPosition = .videoStart
     /// Language of the selected caption.
     var currentCaptionLanguage: String?
     /// Language of the selected audio track.

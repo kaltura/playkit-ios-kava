@@ -44,6 +44,7 @@ extension KavaPlugin: AnalyticsPluginProtocol {
             PlayerEvent.playing,
             PlayerEvent.seeking,
             PlayerEvent.sourceSelected,
+            PlayerEvent.stopped,
             PlayerEvent.ended,
             PlayerEvent.replay,
             PlayerEvent.textTrackChanged,
@@ -72,6 +73,8 @@ extension KavaPlugin: AnalyticsPluginProtocol {
                 self.handleSeeking(targetSeekPosition: event.targetSeekPosition)
             case is PlayerEvent.SourceSelected:
                 self.handleSourceSelected(mediaSource: event.mediaSource)
+            case is PlayerEvent.Stopped:
+                self.handleStopped()
             case is PlayerEvent.Ended:
                 self.handleEnded()
             case is PlayerEvent.Replay:
@@ -186,6 +189,11 @@ extension KavaPlugin: AnalyticsPluginProtocol {
             self.kavaData.selectedSource = source
             self.updateDeliveryType(mediaFormat: source.mediaFormat)
         }
+    }
+    
+    private func handleStopped() {
+        PKLog.debug("stopped event")
+        self.stopViewTimer()
     }
     
     private func handleEnded() {

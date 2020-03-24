@@ -18,12 +18,12 @@ extension KavaPlugin: AnalyticsPluginProtocol {
     /************************************************************/
     
     public var isFirstPlayRequest: Bool {
-           get {
-               return self.kavaData.isFirstPlayRequest
-           }
-           set {
-               self.kavaData.isFirstPlayRequest = newValue
-           }
+        get {
+            return self.kavaData.isFirstPlayRequest
+        }
+        set {
+            self.kavaData.isFirstPlayRequest = newValue
+        }
     }
     
     public var isFirstPlay: Bool {

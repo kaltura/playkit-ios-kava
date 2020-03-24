@@ -17,11 +17,20 @@ extension KavaPlugin: AnalyticsPluginProtocol {
     // MARK: - AnalyticsPluginProtocol
     /************************************************************/
     
+    public var isFirstPlayRequest: Bool {
+           get {
+               return self.kavaData.isFirstPlayRequest
+           }
+           set {
+               self.kavaData.isFirstPlayRequest = newValue
+           }
+    }
+    
     public var isFirstPlay: Bool {
         get {
             return self.kavaData.isFirstPlay
         }
-        set(newValue) {
+        set {
             self.kavaData.isFirstPlay = newValue
         }
     }
@@ -132,11 +141,11 @@ extension KavaPlugin: AnalyticsPluginProtocol {
     private func handlePlay() {
         PKLog.debug("play event")
         
-        if self.isFirstPlay {
+        if self.isFirstPlayRequest {
+            self.isFirstPlayRequest = false
             self.joinTimeStart = Date().timeIntervalSince1970
+            self.sendAnalyticsEvent(event: EventType.playRequest)
         }
-        
-        self.sendAnalyticsEvent(event: EventType.playRequest)
     }
     
     private func handlePause() {

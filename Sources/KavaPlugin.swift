@@ -246,6 +246,7 @@ let playbackPoints: [KavaPlugin.EventType] = [KavaPlugin.EventType.playReached25
     func resetPlayerFlags() {
         self.kavaData.isMediaLoaded = false
         self.sentPlaybackPoints = KavaPlugin.cleanPlaybackPoints()
+        self.kavaData.isFirstPlayRequest = true
         self.kavaData.isFirstPlay = true
         self.kavaData.errorCode = -1
         self.kavaData.errorDetails = nil
@@ -256,6 +257,7 @@ let playbackPoints: [KavaPlugin.EventType] = [KavaPlugin.EventType.playReached25
         self.kavaData.totalBufferingInCurrentInterval = 0
         self.eventIndex = 1
         self.kavaData.indicatedBitrate = 0
+        self.joinTimeStart = 0
     }
     
     func sendPercentageReachedEvent(percentage: Int) {

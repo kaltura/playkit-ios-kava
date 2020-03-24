@@ -57,11 +57,13 @@ class KavaPluginData {
     var currentCaptionLanguage: String?
     /// Language of the selected audio track.
     var currentAudioLanguage: String?
-    /// indicates whether we played for the first time or not.
+    /// Indicates whether play was requested for the first time or not.
+    public var isFirstPlayRequest: Bool = true
+    /// Indicates whether we played for the first time or not.
     public var isFirstPlay: Bool = true
-    /// indicates whether playback is paused.
+    /// Indicates whether playback is paused.
     public var isPaused: Bool = true
-    /// indicates playback type (vod/ live)
+    /// Indicates playback type (vod/ live)
     public var playbackType: String?
     // These params help identify DVR
     var mediaDuration: Double?

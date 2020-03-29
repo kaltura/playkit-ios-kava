@@ -251,6 +251,13 @@ extension KavaPlugin: AnalyticsPluginProtocol {
         if let err = error {
             self.kavaData.errorCode = err.code
             self.kavaData.errorDetails = err.localizedDescription
+            if self.isFirstPlayRequest {
+                self.kavaData.errorPosition = .prePlayRequest
+            } else if self.isFirstPlay {
+                self.kavaData.errorPosition = .videoStart
+            } else {
+                self.kavaData.errorPosition = .midStream
+            }
             self.sendAnalyticsEvent(event: EventType.error)
         }
     }

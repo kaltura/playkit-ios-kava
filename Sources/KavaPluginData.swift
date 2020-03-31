@@ -26,13 +26,13 @@ class KavaPluginData {
     }
     
     enum ErrorPosition: Int, CustomStringConvertible {
-        case prePlayRequest = -1
+        case prePlayRequest = 3
         case videoStart = 1
         case midStream = 2
         
         var description: String {
             switch self {
-            case .prePlayRequest: return "-1"
+            case .prePlayRequest: return "3"
             case .videoStart: return "1"
             case .midStream: return "2"
             }

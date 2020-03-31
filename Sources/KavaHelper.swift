@@ -99,17 +99,17 @@ class KavaHelper {
         }
         
         if let currentTime = kavaData.mediaCurrentTime {
-            request.setParam(key: "position", value: String(currentTime))
+            request.setParam(key: "position", value: String(format: "%.3f", currentTime))
         }
         
         switch eventType {
         case KavaPlugin.EventType.view, KavaPlugin.EventType.play, KavaPlugin.EventType.resume:
             request.setParam(key: "bufferTime", value: String(kavaData.totalBufferingInCurrentInterval))
             request.setParam(key: "bufferTimeSum", value: String(kavaData.totalBuffering))
-            request.setParam(key: "actualBitrate", value: String(describing: kibibits(bits: kavaData.indicatedBitrate)))
+            request.setParam(key: "actualBitrate", value: String(format: "%.3f", kibibits(bits: kavaData.indicatedBitrate)))
             // view event has more data to be set
             if eventType == KavaPlugin.EventType.view {
-                request.setParam(key: "averageBitrate", value: String(kibibits(bits: kavaData.bitrateSum / Double(kavaData.bitrateCount))))
+                request.setParam(key: "averageBitrate", value: String(format: "%.3f",kibibits(bits: kavaData.bitrateSum / Double(kavaData.bitrateCount))))
                 request.setParam(key: "playTimeSum", value: String(kavaData.totalPlayTime))
                 if let currentAudioLanguage = kavaData.currentAudioLanguage {
                     request.setParam(key: "audioLanguage", value: currentAudioLanguage)
@@ -120,12 +120,12 @@ class KavaHelper {
             }
             if eventType == KavaPlugin.EventType.play {
                 if let joinTime = kavaData.joinTime {
-                    request.setParam(key: "joinTime", value: String(joinTime))
+                    request.setParam(key: "joinTime", value: String(format: "%.3f", joinTime))
                 }
             }
             
         case KavaPlugin.EventType.seek:
-            request.setParam(key: "targetPosition", value: String(kavaData.targetSeekPosition))
+            request.setParam(key: "targetPosition", value: String(format: "%.3f", kavaData.targetSeekPosition))
             
         case KavaPlugin.EventType.captions:
             if let caption = kavaData.currentCaptionLanguage {
@@ -145,7 +145,7 @@ class KavaHelper {
             }
             
         case KavaPlugin.EventType.flavorSwitched:
-            request.setParam(key: "actualBitrate", value: String(describing: kibibits(bits: kavaData.indicatedBitrate)))
+            request.setParam(key: "actualBitrate", value: String(format: "%.3f",kibibits(bits: kavaData.indicatedBitrate)))
             
         default:
             PKLog.debug("KavaEventType occurred: \(eventType) (\(eventType.rawValue)), without adding Dynamic Params")

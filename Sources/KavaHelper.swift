@@ -77,7 +77,9 @@ class KavaHelper {
         }
         request.setParam(key: "sessionId", value: player.sessionId)
         
-        if let entryId = player.mediaEntry?.id {
+        if let configEntryId = config.entryId {
+            request.setParam(key: "entryId", value: configEntryId)
+        } else if let entryId = player.mediaEntry?.id {
             request.setParam(key: "entryId", value: entryId)
         }
         

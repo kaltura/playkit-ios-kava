@@ -11,6 +11,7 @@
 import PlayKit
 import KalturaNetKit
 import SwiftyJSON
+import Foundation
 
 /************************************************************/
 // MARK: - Playback Points Array

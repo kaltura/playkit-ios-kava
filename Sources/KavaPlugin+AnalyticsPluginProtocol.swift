@@ -10,6 +10,7 @@
 
 
 import PlayKit
+import Foundation
 
 extension KavaPlugin: AnalyticsPluginProtocol {
     

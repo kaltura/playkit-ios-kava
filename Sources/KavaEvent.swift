@@ -9,6 +9,7 @@
 // ===================================================================================================
 
 import PlayKit
+import Foundation
 
 /// `KavaEvent` represents an event reporting from kava plugin.
 @objc public class KavaEvent: PKEvent {

@@ -351,7 +351,7 @@ let playbackPoints: [KavaPlugin.EventType] = [KavaPlugin.EventType.playReached25
         }
         
         PKLog.debug("Sending Kava Event, \(event) (\(event.rawValue)): \(builder.urlParams!)")
-        USRExecutor.shared.send(request: builder.build())
+        KNKRequestExecutor.shared.send(request: builder.build())
         
         self.eventIndex += 1
         self.kavaData.totalBufferingInCurrentInterval = TimeInterval()

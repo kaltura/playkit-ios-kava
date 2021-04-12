@@ -54,6 +54,8 @@ class KavaPluginData {
     var playTimeInCurrentInterval: TimeInterval = 0
     /// The total amount of time spent viewing
     var totalPlayTime: TimeInterval = 0
+    /// Playback Rate
+    var lastKnownPlaybackSpeed: Float = 1.0
     /// The player's streamerType (hls/ url)
     var deliveryType: String = DeliveryType.url.rawValue
     var selectedSource: PKMediaSource?

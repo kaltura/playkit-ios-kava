@@ -104,6 +104,8 @@ class KavaHelper {
             request.setParam(key: "position", value: String(format: "%.3f", currentTime))
         }
         
+        request.setParam(key: "playbackSpeed", value: String(format: "%.2f", kavaData.lastKnownPlaybackSpeed))
+        
         switch eventType {
         case KavaPlugin.EventType.view, KavaPlugin.EventType.play, KavaPlugin.EventType.resume:
             request.setParam(key: "bufferTime", value: String(kavaData.totalBufferingInCurrentInterval))

@@ -105,6 +105,10 @@ class KavaHelper {
         }
         
         request.setParam(key: "playbackSpeed", value: String(format: "%.2f", kavaData.lastKnownPlaybackSpeed))
+
+        if let caption = kavaData.currentCaptionLanguage {
+            request.setParam(key: "caption", value: caption)
+        }
         
         switch eventType {
         case KavaPlugin.EventType.view, KavaPlugin.EventType.play, KavaPlugin.EventType.resume:
@@ -118,9 +122,6 @@ class KavaHelper {
                 if let currentAudioLanguage = kavaData.currentAudioLanguage {
                     request.setParam(key: "audioLanguage", value: currentAudioLanguage)
                 }
-                if let currentCaptionLanguage = kavaData.currentCaptionLanguage {
-                    request.setParam(key: "captionsLanguage", value: currentCaptionLanguage)
-                }
             }
             if eventType == KavaPlugin.EventType.play {
                 if let joinTime = kavaData.joinTime {
@@ -130,12 +131,7 @@ class KavaHelper {
             
         case KavaPlugin.EventType.seek:
             request.setParam(key: "targetPosition", value: String(format: "%.3f", kavaData.targetSeekPosition))
-            
-        case KavaPlugin.EventType.captions:
-            if let caption = kavaData.currentCaptionLanguage {
-                request.setParam(key: "caption", value: caption)
-            }
-            
+        
         case KavaPlugin.EventType.audioSelected:
             if let audioLanguage = kavaData.currentAudioLanguage {
                 request.setParam(key: "language", value: audioLanguage)

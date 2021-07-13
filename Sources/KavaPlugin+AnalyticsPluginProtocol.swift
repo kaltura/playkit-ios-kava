@@ -42,6 +42,7 @@ extension KavaPlugin: AnalyticsPluginProtocol {
             PlayerEvent.play,
             PlayerEvent.pause,
             PlayerEvent.playing,
+            PlayerEvent.playbackRate,
             PlayerEvent.seeking,
             PlayerEvent.sourceSelected,
             PlayerEvent.stopped,
@@ -87,6 +88,8 @@ extension KavaPlugin: AnalyticsPluginProtocol {
                 self.handleTextTrackChanged(event.selectedTrack)
             case is PlayerEvent.Error:
                 self.handleError(error: event.error)
+            case is PlayerEvent.PlaybackRate:
+                self.handlePlaybackRate(rate: event.palybackRate)
             default:
                 assertionFailure("all player events must be handled")
             }
@@ -259,6 +262,15 @@ extension KavaPlugin: AnalyticsPluginProtocol {
                 self.kavaData.errorPosition = .midStream
             }
             self.sendAnalyticsEvent(event: EventType.error)
+        }
+    }
+    
+    private func handlePlaybackRate(rate: NSNumber?) {
+        PKLog.debug("PlaybackRateChanged event")
+        
+        if let rate = rate {
+            self.kavaData.lastKnownPlaybackSpeed = rate.floatValue;
+            self.sendAnalyticsEvent(event: EventType.speed)
         }
     }
     

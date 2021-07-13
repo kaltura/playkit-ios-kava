@@ -104,6 +104,8 @@ class KavaHelper {
             request.setParam(key: "position", value: String(format: "%.3f", currentTime))
         }
         
+        request.setParam(key: "playbackSpeed", value: String(format: "%.2f", kavaData.lastKnownPlaybackSpeed))
+
         if let caption = kavaData.currentCaptionLanguage {
             request.setParam(key: "caption", value: caption)
         }

@@ -58,6 +58,8 @@ let playbackPoints: [KavaPlugin.EventType] = [KavaPlugin.EventType.playReached25
         case captions = 38
         /// Source Selected (media was changed) event was triggred
         case sourceSelected = 39
+        /// Rate (playback rate was changed) event was triggred
+        case speed = 41
         /// Sent when audio track changed
         case audioSelected = 42
         /// The video track has changed to a different bitrate (indicated bitrate).
@@ -81,6 +83,8 @@ let playbackPoints: [KavaPlugin.EventType] = [KavaPlugin.EventType.playReached25
                 return "play"
             case .resume:
                 return "resume"
+            case .speed:
+                return "playbackSpeed"
             case .playReached25Percent:
                 return "playReached25Percent"
             case .playReached50Percent:
@@ -258,6 +262,7 @@ let playbackPoints: [KavaPlugin.EventType] = [KavaPlugin.EventType.playReached25
         self.eventIndex = 1
         self.kavaData.indicatedBitrate = 0
         self.joinTimeStart = 0
+        self.kavaData.lastKnownPlaybackSpeed = 1.0
     }
     
     func sendPercentageReachedEvent(percentage: Int) {

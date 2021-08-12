@@ -314,15 +314,33 @@ let playbackPoints: [KavaPlugin.EventType] = [KavaPlugin.EventType.playReached25
         self.kavaData.mediaDuration = player.duration
         self.kavaData.mediaCurrentTime = player.currentTime
         
-        guard let builder: KalturaRequestBuilder = KavaHelper.builder(config: self.config, 
+        if config.entryId == nil,
+           let entryId = player.mediaEntry?.id {
+            
+            config.entryId = entryId
+        } else if config.entryId == nil,
+                  let metadata = player.mediaEntry?.metadata,
+                  let partnerId = Int(metadata["partnerId"] ?? ""),
+                  let entryId = metadata["entryId"] {
+            
+            config.partnerId = partnerId
+            config.entryId = entryId
+        }
+        
+        if config.partnerId <= 0 {
+            config.partnerId = KavaPluginConfig.defaultKavaPartnerId
+            config.entryId = KavaPluginConfig.defaultKavaEntryId
+        }
+        
+        guard let builder: KalturaRequestBuilder = KavaHelper.builder(config: config,
                                                                       mediaType: declaredMediaType,
                                                                       eventType: event,
                                                                       eventIndex: self.eventIndex,
                                                                       kavaData: self.kavaData,
                                                                       player: player)
-            else {
-                PKLog.warning("KalturaRequestBuilder is nil")
-                return
+        else {
+            PKLog.warning("KalturaRequestBuilder is nil")
+            return
         }
         
         builder.set(method: .get)

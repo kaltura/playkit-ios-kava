@@ -79,8 +79,9 @@ class KavaHelper {
         
         if let configEntryId = config.entryId {
             request.setParam(key: "entryId", value: configEntryId)
-        } else if let entryId = player.mediaEntry?.id {
-            request.setParam(key: "entryId", value: entryId)
+        } else {
+            request.setParam(key: "partnerId", value: String(KavaPluginConfig.defaultKavaPartnerId))
+            request.setParam(key: "entryId", value: KavaPluginConfig.defaultKavaEntryId)
         }
         
         if let sessionStartTime = config.sessionStartTime {

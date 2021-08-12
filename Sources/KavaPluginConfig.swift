@@ -32,6 +32,8 @@ import PlayKit
     /************************************************************/
     
     private let defaultBaseUrl = "https://analytics.kaltura.com/api_v3/index.php"
+    static let defaultKavaPartnerId: Int = 2504201
+    static let defaultKavaEntryId: String = "1_3bwzbc9o"
     
     /// application ID.
     let applicationId = Bundle.main.bundleIdentifier

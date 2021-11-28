@@ -279,6 +279,17 @@ let playbackPoints: [KavaPlugin.EventType] = [KavaPlugin.EventType.playReached25
         }
     }
     
+    private func updateEntryId(_ entryId: String) {
+        if !entryId.isEmpty {
+            
+            config.entryId = entryId
+        } else {
+            
+            config.entryId = KavaPluginConfig.defaultKavaEntryId
+            config.partnerId = KavaPluginConfig.defaultKavaPartnerId
+        }
+    }
+    
     func sendAnalyticsEvent(event: EventType) {
         guard let player = self.player else {
             PKLog.warning("Player/ MediaEntry is nil")
@@ -314,19 +325,23 @@ let playbackPoints: [KavaPlugin.EventType] = [KavaPlugin.EventType.playReached25
         self.kavaData.mediaDuration = player.duration
         self.kavaData.mediaCurrentTime = player.currentTime
         
-        if config.entryId == nil,
-           let entryId = player.mediaEntry?.id {
-            
-            config.entryId = entryId
-        } else if config.entryId == nil,
-                  let metadata = player.mediaEntry?.metadata,
-                  let partnerId = Int(metadata["partnerId"] ?? ""),
-                  let entryId = metadata["entryId"] {
-            
+        if let metadata = player.mediaEntry?.metadata,
+             let partnerId = Int(metadata["partnerId"] ?? "") {
             config.partnerId = partnerId
-            config.entryId = entryId
         }
         
+        if config.entryId == nil,
+                  let metadata = player.mediaEntry?.metadata,
+                  let entryId = metadata["entryId"] {
+            
+            updateEntryId(entryId)
+                  
+        } else if config.entryId == nil,
+           let entryId = player.mediaEntry?.id {
+            
+            updateEntryId(entryId)
+        }
+                
         if config.partnerId <= 0 {
             config.partnerId = KavaPluginConfig.defaultKavaPartnerId
             config.entryId = KavaPluginConfig.defaultKavaEntryId

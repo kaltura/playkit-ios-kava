@@ -326,22 +326,22 @@ let playbackPoints: [KavaPlugin.EventType] = [KavaPlugin.EventType.playReached25
         self.kavaData.mediaCurrentTime = player.currentTime
         
         if let metadata = player.mediaEntry?.metadata,
-             let partnerId = Int(metadata["partnerId"] ?? "") {
+           let partnerId = Int(metadata["partnerId"] ?? "") {
             config.partnerId = partnerId
         }
         
         if config.entryId == nil,
-                  let metadata = player.mediaEntry?.metadata,
-                  let entryId = metadata["entryId"] {
+           let metadata = player.mediaEntry?.metadata,
+           let entryId = metadata["entryId"] {
             
             updateEntryId(entryId)
-                  
+            
         } else if config.entryId == nil,
-           let entryId = player.mediaEntry?.id {
+                  let entryId = player.mediaEntry?.id {
             
             updateEntryId(entryId)
         }
-                
+        
         if config.partnerId <= 0 {
             config.partnerId = KavaPluginConfig.defaultKavaPartnerId
             config.entryId = KavaPluginConfig.defaultKavaEntryId

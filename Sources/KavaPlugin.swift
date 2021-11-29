@@ -279,12 +279,11 @@ let playbackPoints: [KavaPlugin.EventType] = [KavaPlugin.EventType.playReached25
         }
     }
     
-    private func updateEntryId(_ entryId: String) {
-        if !entryId.isEmpty {
-            
+    private func update(entryId: String) {
+        // Testing if entryId is string mixing letters and numbers it is OVP id.
+        if !entryId.isEmpty, (Int(entryId) == nil) { // OVP
             config.entryId = entryId
         } else {
-            
             config.entryId = KavaPluginConfig.defaultKavaEntryId
             config.partnerId = KavaPluginConfig.defaultKavaPartnerId
         }
@@ -326,20 +325,17 @@ let playbackPoints: [KavaPlugin.EventType] = [KavaPlugin.EventType.playReached25
         self.kavaData.mediaCurrentTime = player.currentTime
         
         if let metadata = player.mediaEntry?.metadata,
-           let partnerId = Int(metadata["partnerId"] ?? "") {
+           let partnerId = Int(metadata["partnerId"] ?? "") { // For OVP
             config.partnerId = partnerId
         }
         
         if config.entryId == nil,
            let metadata = player.mediaEntry?.metadata,
-           let entryId = metadata["entryId"] {
-            
-            updateEntryId(entryId)
-            
+           let entryId = metadata["entryId"] { // For OTT or OVP
+            update(entryId: entryId)
         } else if config.entryId == nil,
-                  let entryId = player.mediaEntry?.id {
-            
-            updateEntryId(entryId)
+                  let entryId = player.mediaEntry?.id { // For OVP
+            update(entryId: entryId)
         }
         
         if config.partnerId <= 0 {

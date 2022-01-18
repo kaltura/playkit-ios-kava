@@ -65,6 +65,9 @@ import PlayKit
     /// The playlist Id.
     @objc public var playlistId: String?
     
+    /// Optional virtual eventId.
+    @objc public var virtualEventId: String?
+    
     /************************************************************/
     // MARK: Internal Properties
     /************************************************************/
@@ -76,7 +79,18 @@ import PlayKit
     // MARK: - Initialization
     /************************************************************/
     
-    @objc public init(partnerId: Int, entryId: String? = nil, ks: String? = nil, userId: String? = nil, playbackContext: String? = nil, referrer: String? = nil, applicationVersion: String? = nil, playlistId: String? = nil, customVar1: String? = nil, customVar2: String? = nil, customVar3: String? = nil) {
+    @objc public init(partnerId: Int,
+                      entryId: String? = nil,
+                      ks: String? = nil,
+                      userId: String? = nil,
+                      playbackContext: String? = nil,
+                      referrer: String? = nil,
+                      applicationVersion: String? = nil,
+                      playlistId: String? = nil,
+                      customVar1: String? = nil,
+                      customVar2: String? = nil,
+                      customVar3: String? = nil,
+                      virtualEventId: String? = nil) {
         self.baseUrl = defaultBaseUrl
         // uiconfId is optional, set to -1 as default
         // can be overridden
@@ -91,6 +105,7 @@ import PlayKit
         self.customVar1 = customVar1
         self.customVar2 = customVar2
         self.customVar3 = customVar3
+        self.virtualEventId = virtualEventId
         super.init()
         
         if let sentReferrer = referrer, self.isValidReferrer(sentReferrer) {

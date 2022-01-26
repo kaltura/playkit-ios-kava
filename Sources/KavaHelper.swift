@@ -237,5 +237,9 @@ class KavaHelper {
         if let playlistId = config.playlistId {
             request.setParam(key: "playlistId", value: playlistId)
         }
+        
+        if let virtualEventId = config.virtualEventId {
+            request.setParam(key: "virtualEventId", value: virtualEventId)
+        }
     }
 }

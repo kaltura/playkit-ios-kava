@@ -168,11 +168,16 @@ extension KavaPlugin: AnalyticsPluginProtocol {
             self.isFirstPlay = false
             self.kavaData.joinTime = Date().timeIntervalSince1970 - self.joinTimeStart
             self.sendAnalyticsEvent(event: EventType.play)
+            self.sendAnalyticsEvent(event: EventType.view)
         } else if self.kavaData.isPaused {
             self.sendAnalyticsEvent(event: EventType.resume)
         }
         self.kavaData.isPaused = false
-        self.setupViewTimer()
+        
+        // This timer logic is not relevant now.
+        // The reason is that Kava derives the vod viewed percentiles from the view beacons.
+        // For short videos, it is possible that the range 0..10 represents several percentages.
+        // self.setupViewTimer()
     }
     
     private func handleSeeking(targetSeekPosition: NSNumber?) {

@@ -174,10 +174,7 @@ extension KavaPlugin: AnalyticsPluginProtocol {
         }
         self.kavaData.isPaused = false
         
-        // This timer logic is not relevant now.
-        // The reason is that Kava derives the vod viewed percentiles from the view beacons.
-        // For short videos, it is possible that the range 0..10 represents several percentages.
-        // self.setupViewTimer()
+        self.setupViewTimer()
     }
     
     private func handleSeeking(targetSeekPosition: NSNumber?) {

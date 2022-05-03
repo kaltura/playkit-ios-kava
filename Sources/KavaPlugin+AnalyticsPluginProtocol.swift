@@ -168,6 +168,7 @@ extension KavaPlugin: AnalyticsPluginProtocol {
             self.isFirstPlay = false
             self.kavaData.joinTime = Date().timeIntervalSince1970 - self.joinTimeStart
             self.sendAnalyticsEvent(event: EventType.play)
+            // We are not calling reportView() function because timer is currently nil.
             self.sendAnalyticsEvent(event: EventType.view)
         } else if self.kavaData.isPaused {
             self.sendAnalyticsEvent(event: EventType.resume)

@@ -68,6 +68,8 @@ import PlayKit
     /// Optional virtual eventId.
     @objc public var virtualEventId: String?
     
+    @objc public var defaultPluginConfig: Bool = false
+    
     /************************************************************/
     // MARK: Internal Properties
     /************************************************************/

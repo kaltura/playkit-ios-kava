@@ -284,6 +284,7 @@ let playbackPoints: [KavaPlugin.EventType] = [KavaPlugin.EventType.playReached25
         if !entryId.isEmpty, (Int(entryId) == nil) { // OVP
             config.entryId = entryId
         } else {
+            // This case will be applied also for OTT KalturaLiveAsset if "entryId" is "".
             config.entryId = KavaPluginConfig.defaultKavaEntryId
             config.partnerId = KavaPluginConfig.defaultKavaPartnerId
         }

@@ -8,6 +8,7 @@
 // https://www.gnu.org/licenses/agpl-3.0.html
 // ===================================================================================================
 
+import Foundation
 import PlayKit
 
 /// `KavaEvent` represents an event reporting from kava plugin.

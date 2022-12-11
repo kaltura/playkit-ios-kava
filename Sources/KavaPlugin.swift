@@ -8,6 +8,7 @@
 // https://www.gnu.org/licenses/agpl-3.0.html
 // ===================================================================================================
 
+import Foundation
 import PlayKit
 import KalturaNetKit
 import SwiftyJSON

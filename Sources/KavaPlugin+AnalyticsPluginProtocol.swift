@@ -10,7 +10,10 @@
 
 import Foundation
 import PlayKit
-import AnalyticsCommon
+
+#if canImport(AnalyticsCommon)
+    import AnalyticsCommon
+#endif
 
 extension KavaPlugin: AnalyticsPluginProtocol {
     

@@ -11,12 +11,11 @@ let package = Package(
     dependencies: [
         .package(name: "PlayKit",
                  url: "https://github.com/kaltura/playkit-ios.git",
-                 .branch("FEC-12640")),
+                 .upToNextMinor(from: "3.27.1")),
     ],
     targets: [.target(name: "PlayKitKava",
                       dependencies:
                         [
-//                            .product(name: "PlayKit", package: "PlayKit"),
                             .product(name: "AnalyticsCommon", package: "PlayKit"),
                         ],
                       path: "Sources/")

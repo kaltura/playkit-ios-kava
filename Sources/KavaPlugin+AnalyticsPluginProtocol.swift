@@ -8,8 +8,12 @@
 // https://www.gnu.org/licenses/agpl-3.0.html
 // ===================================================================================================
 
-
+import Foundation
 import PlayKit
+
+#if canImport(AnalyticsCommon)
+    import AnalyticsCommon
+#endif
 
 extension KavaPlugin: AnalyticsPluginProtocol {
     

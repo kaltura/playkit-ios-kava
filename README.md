@@ -1,3 +1,9 @@
+![Swift 3.0+](https://img.shields.io/badge/Swift-3.0+-orange.svg)
+[![CI Status](https://github.com/kaltura/playkit-ios-kava/actions/workflows/ci.yml/badge.svg)](https://github.com/kaltura/playkit-ios-kava/actions/workflows/ci.yml)
+[![Version](https://img.shields.io/cocoapods/v/PlayKitKava.svg?style=flat)](https://cocoapods.org/pods/PlayKitKava)
+[![License](https://img.shields.io/cocoapods/l/PlayKitKava.svg?style=flat)](https://cocoapods.org/pods/PlayKitKava)
+[![Platform](https://img.shields.io/cocoapods/p/PlayKitKava.svg?style=flat)](https://cocoapods.org/pods/PlayKitKava)
+
 # PlayKit Kava Plugin
 
 This project is the new client analytics project of Kaltura.
